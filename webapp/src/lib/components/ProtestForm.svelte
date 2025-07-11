@@ -5,7 +5,7 @@
   import { z } from 'zod';
   import { supabase } from '$lib/supabase';
   import { goto } from '$app/navigation';
-  import type { State, EventType, ParticipantType, ParticipantMeasure, PoliceMeasure, NotesOption } from '$lib/types/database';
+  import type { State, EventType, ParticipantType, ParticipantMeasure, PoliceMeasure, NotesOption, FormValues, ProtestData, IncidentStatus, JunctionOption } from '$lib/types/database';
 
   // Fetch lookup data
   let states: State[] = [];
@@ -50,7 +50,10 @@
   loadLookupData();
 
   // Form schema
+  const incidentStatusSchema = z.enum(['yes', 'no']);
+  
   const schema = z.object({
+    // Basic info
     date_of_event: z.string().min(1, 'Date is required'),
     locality: z.string().min(1, 'City is required'),
     state_code: z.string().min(1, 'State is required'),
@@ -63,22 +66,44 @@
     claims_verbatim: z.string().optional(),
     macroevent: z.string().optional(),
     is_online: z.boolean(),
+    
+    // Crowd size
     crowd_size_low: z.string().optional(),
     crowd_size_high: z.string().optional(),
+    
+    // Multi-select arrays
+    event_types: z.array(z.union([z.number(), z.literal('other')])),
+    participant_types: z.array(z.number()),
+    participant_measures: z.array(z.union([z.number(), z.literal('other')])),
+    police_measures: z.array(z.union([z.number(), z.literal('other')])),
+    notes: z.array(z.union([z.number(), z.literal('other')])),
+    
+    // Incident fields
+    participant_injury: incidentStatusSchema,
+    participant_injury_details: z.string().optional(),
+    police_injury: incidentStatusSchema,
+    police_injury_details: z.string().optional(),
+    arrests: incidentStatusSchema,
+    arrests_details: z.string().optional(),
+    property_damage: incidentStatusSchema,
+    property_damage_details: z.string().optional(),
+    participant_casualties: incidentStatusSchema,
+    participant_casualties_details: z.string().optional(),
+    police_casualties: incidentStatusSchema,
+    police_casualties_details: z.string().optional(),
+    
+    // Sources
     sources: z.string().optional()
   });
 
   // Track "other" values
-  let eventTypeOthers = {};
-  let participantMeasureOthers = {};
-  let policeMeasureOthers = {};
-  let notesOthers = {};
+  let eventTypeOthers: Record<string, string> = {};
+  let participantMeasureOthers: Record<string, string> = {};
+  let policeMeasureOthers: Record<string, string> = {};
+  let notesOthers: Record<string, string> = {};
 
-  // Debug: Log when form is being created
-  console.log('Creating Felte form...');
-  
   // Form handling
-  const { form, errors, isSubmitting } = createForm({
+  const { form, errors, isSubmitting } = createForm<FormValues>({
     initialValues: {
       event_types: [],
       participant_types: [],
@@ -86,19 +111,18 @@
       police_measures: [],
       notes: [],
       is_online: false,
-      participant_injury: 'no',
-      police_injury: 'no',
-      arrests: 'no',
-      property_damage: 'no',
-      participant_casualties: 'no',
-      police_casualties: 'no'
+      participant_injury: 'no' as IncidentStatus,
+      police_injury: 'no' as IncidentStatus,
+      arrests: 'no' as IncidentStatus,
+      property_damage: 'no' as IncidentStatus,
+      participant_casualties: 'no' as IncidentStatus,
+      police_casualties: 'no' as IncidentStatus
     },
-    //extend: validator({ schema }), // Temporarily disable validation
+    extend: validator({ schema }),
     onSubmit: async (values) => {
-      console.log('Form submitted with values:', values);
       try {
         // Prepare data for submission
-        const protestData = {
+        const protestData: ProtestData = {
           date_of_event: values.date_of_event,
           locality: values.locality,
           state_code: values.state_code,
@@ -129,26 +153,26 @@
         };
 
         // Prepare junction table data
-        const eventTypesData = values.event_types.map(id => ({
-          id: id === 'other' ? null : id,
-          other: id === 'other' ? eventTypeOthers[id] : null
+        const eventTypesData: JunctionOption[] = values.event_types.map(id => ({
+          id: id === 'other' ? null : id as number,
+          other: id === 'other' ? eventTypeOthers['other'] : null
         }));
 
-        const participantTypesData = values.participant_types.map(id => ({ id }));
+        const participantTypesData: { id: number }[] = values.participant_types.map(id => ({ id }));
 
-        const participantMeasuresData = values.participant_measures.map(id => ({
-          id: id === 'other' ? null : id,
-          other: id === 'other' ? participantMeasureOthers[id] : null
+        const participantMeasuresData: JunctionOption[] = values.participant_measures.map(id => ({
+          id: id === 'other' ? null : id as number,
+          other: id === 'other' ? participantMeasureOthers['other'] : null
         }));
 
-        const policeMeasuresData = values.police_measures.map(id => ({
-          id: id === 'other' ? null : id,
-          other: id === 'other' ? policeMeasureOthers[id] : null
+        const policeMeasuresData: JunctionOption[] = values.police_measures.map(id => ({
+          id: id === 'other' ? null : id as number,
+          other: id === 'other' ? policeMeasureOthers['other'] : null
         }));
 
-        const notesData = values.notes.map(id => ({
-          id: id === 'other' ? null : id,
-          other: id === 'other' ? notesOthers[id] : null
+        const notesData: JunctionOption[] = values.notes.map(id => ({
+          id: id === 'other' ? null : id as number,
+          other: id === 'other' ? notesOthers['other'] : null
         }));
 
         // Debug: Log the data being submitted
