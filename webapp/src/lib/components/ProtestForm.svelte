@@ -1,20 +1,21 @@
 <!-- ProtestForm.svelte -->
-<script>
+<script lang="ts">
   import { createForm } from 'felte';
   import { validator } from '@felte/validator-zod';
   import { z } from 'zod';
   import { supabase } from '$lib/supabase';
   import { goto } from '$app/navigation';
+  import type { State, EventType, ParticipantType, ParticipantMeasure, PoliceMeasure, NotesOption } from '$lib/types/database';
 
   // Fetch lookup data
-  let states = [];
-  let eventTypes = [];
-  let participantTypes = [];
-  let participantMeasures = [];
-  let policeMeasures = [];
-  let notesOptions = [];
+  let states: State[] = [];
+  let eventTypes: EventType[] = [];
+  let participantTypes: ParticipantType[] = [];
+  let participantMeasures: ParticipantMeasure[] = [];
+  let policeMeasures: PoliceMeasure[] = [];
+  let notesOptions: NotesOption[] = [];
 
-  // Load lookup data on mount
+  // Load option data on component mount
   async function loadLookupData() {
     try {
       const [statesRes, eventTypesRes, participantTypesRes, participantMeasuresRes, policeMeasuresRes, notesRes] = await Promise.all([
@@ -92,7 +93,7 @@
       participant_casualties: 'no',
       police_casualties: 'no'
     },
-    // extend: validator({ schema }), // Temporarily disable validation
+    //extend: validator({ schema }), // Temporarily disable validation
     onSubmit: async (values) => {
       console.log('Form submitted with values:', values);
       try {
@@ -191,35 +192,8 @@
     }
   });
 
-  // Debug: Log the form action
-  console.log('Form action created:', form);
-  console.log('Errors store:', errors);
-  console.log('IsSubmitting store:', isSubmitting);
+
   
-  // Test function to manually check form
-  function debugForm() {
-    console.log('=== FORM DEBUG ===');
-    console.log('Form exists:', !!form);
-    console.log('Current isSubmitting:', $isSubmitting);
-    console.log('Current errors:', $errors);
-    const formEl = document.querySelector('form');
-    console.log('Form element found:', !!formEl);
-    if (formEl) {
-      console.log('Form has use:form directive:', formEl.hasAttribute('use:form'));
-      // Try to submit manually
-      const event = new Event('submit', { bubbles: true, cancelable: true });
-      formEl.dispatchEvent(event);
-    }
-  }
-  
-  // Call debug on mount
-//  import { onMount } from 'svelte';
-//  onMount(() => {
-//    console.log('ProtestForm component mounted');
-//    setTimeout(() => {
-//      debugForm();
-//    }, 1000);
-//  });
 </script>
 
 <div class="max-w-4xl mx-auto p-6">
@@ -652,7 +626,3 @@
   </form>
   
 </div>
-
-<style>
-  /* Custom styles - Tailwind classes are applied directly in the template */
-</style>
