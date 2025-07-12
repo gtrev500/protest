@@ -67,16 +67,16 @@
     macroevent: z.string().optional(),
     is_online: z.boolean(),
     
-    // Crowd size
-    crowd_size_low: z.string().optional(),
-    crowd_size_high: z.string().optional(),
+    // Crowd size - number inputs return numbers, must be integers
+    crowd_size_low: z.number().int().min(0).optional(),
+    crowd_size_high: z.number().int().min(0).optional(),
     
-    // Multi-select arrays
-    event_types: z.array(z.union([z.number(), z.literal('other')])),
-    participant_types: z.array(z.number()),
-    participant_measures: z.array(z.union([z.number(), z.literal('other')])),
-    police_measures: z.array(z.union([z.number(), z.literal('other')])),
-    notes: z.array(z.union([z.number(), z.literal('other')])),
+    // Multi-select arrays - form sends strings for checkbox values
+    event_types: z.array(z.union([z.string(), z.literal('other')])),
+    participant_types: z.array(z.string()),
+    participant_measures: z.array(z.union([z.string(), z.literal('other')])),
+    police_measures: z.array(z.union([z.string(), z.literal('other')])),
+    notes: z.array(z.union([z.string(), z.literal('other')])),
     
     // Incident fields
     participant_injury: incidentStatusSchema,
@@ -102,21 +102,31 @@
   let policeMeasureOthers: Record<string, string> = {};
   let notesOthers: Record<string, string> = {};
 
+  // Infer type from schema for better type safety
+  type SchemaType = z.infer<typeof schema>;
+  
   // Form handling
-  const { form, errors, isSubmitting } = createForm<FormValues>({
+  const { form, errors, isSubmitting } = createForm<SchemaType>({
     initialValues: {
+      // Required fields
+      date_of_event: '',
+      locality: '',
+      state_code: '',
+      title: '',
+      
+      // Optional fields with defaults
       event_types: [],
       participant_types: [],
       participant_measures: [],
       police_measures: [],
       notes: [],
       is_online: false,
-      participant_injury: 'no' as IncidentStatus,
-      police_injury: 'no' as IncidentStatus,
-      arrests: 'no' as IncidentStatus,
-      property_damage: 'no' as IncidentStatus,
-      participant_casualties: 'no' as IncidentStatus,
-      police_casualties: 'no' as IncidentStatus
+      participant_injury: 'no',
+      police_injury: 'no',
+      arrests: 'no',
+      property_damage: 'no',
+      participant_casualties: 'no',
+      police_casualties: 'no'
     },
     extend: validator({ schema }),
     onSubmit: async (values) => {
@@ -135,8 +145,8 @@
           claims_verbatim: values.claims_verbatim,
           macroevent: values.macroevent,
           is_online: values.is_online,
-          crowd_size_low: values.crowd_size_low ? parseInt(values.crowd_size_low) : null,
-          crowd_size_high: values.crowd_size_high ? parseInt(values.crowd_size_high) : null,
+          crowd_size_low: values.crowd_size_low || null,
+          crowd_size_high: values.crowd_size_high || null,
           participant_injury: values.participant_injury,
           participant_injury_details: values.participant_injury_details,
           police_injury: values.police_injury,
@@ -152,26 +162,28 @@
           sources: values.sources
         };
 
-        // Prepare junction table data
+        // Prepare junction table data - convert string IDs to numbers
         const eventTypesData: JunctionOption[] = values.event_types.map(id => ({
-          id: id === 'other' ? null : id as number,
+          id: id === 'other' ? null : parseInt(id),
           other: id === 'other' ? eventTypeOthers['other'] : null
         }));
 
-        const participantTypesData: { id: number }[] = values.participant_types.map(id => ({ id }));
+        const participantTypesData: { id: number }[] = values.participant_types.map(id => ({ 
+          id: parseInt(id) 
+        }));
 
         const participantMeasuresData: JunctionOption[] = values.participant_measures.map(id => ({
-          id: id === 'other' ? null : id as number,
+          id: id === 'other' ? null : parseInt(id),
           other: id === 'other' ? participantMeasureOthers['other'] : null
         }));
 
         const policeMeasuresData: JunctionOption[] = values.police_measures.map(id => ({
-          id: id === 'other' ? null : id as number,
+          id: id === 'other' ? null : parseInt(id),
           other: id === 'other' ? policeMeasureOthers['other'] : null
         }));
 
         const notesData: JunctionOption[] = values.notes.map(id => ({
-          id: id === 'other' ? null : id as number,
+          id: id === 'other' ? null : parseInt(id),
           other: id === 'other' ? notesOthers['other'] : null
         }));
 
@@ -211,7 +223,8 @@
         goto(`/success?id=${data.id}`);
       } catch (error) {
         console.error('Error submitting protest:', error);
-        alert(`Error submitting form: ${error.message || 'Unknown error'}. Please check the console for details.`);
+        //const message = error instanceof Error ? error.message : 'Unknown error';
+        //alert(`Error submitting form: ${message}. Please check the console for details.`);
       }
     }
   });
@@ -223,6 +236,20 @@
 <div class="max-w-4xl mx-auto p-6">
   <h1 class="text-3xl font-bold mb-2">Protest Crowd Counts & Information</h1>
   <p class="text-gray-600 mb-8">Help us document protests accurately for the historical record.</p>
+
+  <!-- Debug: Show all validation errors -->
+  {#if $errors && Object.keys($errors).length > 0}
+    <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded">
+      <h3 class="text-sm font-medium text-red-800 mb-2">Please fix the following errors:</h3>
+      <ul class="list-disc list-inside text-sm text-red-700">
+        {#each Object.entries($errors) as [field, error]}
+          {#if error}
+            <li>{field}: {error}</li>
+          {/if}
+        {/each}
+      </ul>
+    </div>
+  {/if}
 
   <form use:form class="space-y-6">
     <!-- Date of Event -->
@@ -469,6 +496,15 @@
           type="number"
           id="crowd_size_low"
           name="crowd_size_low"
+          min="0"
+          step="1"
+          pattern="[0-9]*"
+          on:keypress={(e) => {
+            // Only allow digits
+            if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab') {
+              e.preventDefault();
+            }
+          }}
           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
         />
       </div>
@@ -481,6 +517,15 @@
           type="number"
           id="crowd_size_high"
           name="crowd_size_high"
+          min="0"
+          step="1"
+          pattern="[0-9]*"
+          on:keypress={(e) => {
+            // Only allow digits
+            if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab') {
+              e.preventDefault();
+            }
+          }}
           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
         />
       </div>
@@ -641,7 +686,11 @@
       <button
         type="submit"
         disabled={$isSubmitting}
-        on:click={() => console.log('Submit button clicked!')}
+        on:click={() => {
+          console.log('Submit button clicked!');
+          console.log('Current errors:', $errors);
+          console.log('Is form valid?', Object.keys($errors).length === 0);
+        }}
         class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400"
       >
         {$isSubmitting ? 'Submitting...' : 'Submit Protest Information'}
