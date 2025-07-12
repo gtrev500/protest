@@ -5,7 +5,7 @@
   import { z } from 'zod';
   import { supabase } from '$lib/supabase';
   import { goto } from '$app/navigation';
-  import type { State, EventType, ParticipantType, ParticipantMeasure, PoliceMeasure, NotesOption, FormValues, ProtestData, IncidentStatus, JunctionOption } from '$lib/types/database';
+  import type { State, EventType, ParticipantType, ParticipantMeasure, PoliceMeasure, NotesOption, ProtestData, IncidentStatus, JunctionOption } from '$lib/types/database';
 
   // Fetch lookup data
   let states: State[] = [];
@@ -102,6 +102,9 @@
   let policeMeasureOthers: Record<string, string> = {};
   let notesOthers: Record<string, string> = {};
 
+  // Track whether to show validation errors
+  let showValidationErrors = false;
+
   // Infer type from schema for better type safety
   type SchemaType = z.infer<typeof schema>;
   
@@ -187,16 +190,6 @@
           other: id === 'other' ? notesOthers['other'] : null
         }));
 
-        // Debug: Log the data being submitted
-        console.log('Submitting protest data:', {
-          protest_data: protestData,
-          event_types_data: eventTypesData,
-          participant_types_data: participantTypesData,
-          participant_measures_data: participantMeasuresData,
-          police_measures_data: policeMeasuresData,
-          notes_data: notesData
-        });
-
         // Submit using the database function
         const { data, error } = await supabase.rpc('submit_protest', {
           protest_data: protestData,
@@ -237,8 +230,8 @@
   <h1 class="text-3xl font-bold mb-2">Protest Crowd Counts & Information</h1>
   <p class="text-gray-600 mb-8">Help us document protests accurately for the historical record.</p>
 
-  <!-- Debug: Show all validation errors -->
-  {#if $errors && Object.keys($errors).length > 0}
+  <!-- Show validation errors only after submit attempt -->
+  {#if showValidationErrors && $errors && Object.keys($errors).length > 0}
     <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded">
       <h3 class="text-sm font-medium text-red-800 mb-2">Please fix the following errors:</h3>
       <ul class="list-disc list-inside text-sm text-red-700">
@@ -687,9 +680,7 @@
         type="submit"
         disabled={$isSubmitting}
         on:click={() => {
-          console.log('Submit button clicked!');
-          console.log('Current errors:', $errors);
-          console.log('Is form valid?', Object.keys($errors).length === 0);
+          showValidationErrors = true;
         }}
         class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400"
       >
