@@ -2,10 +2,10 @@
 <script lang="ts">
   import { createForm } from 'felte';
   import { validator } from '@felte/validator-zod';
-  import { z } from 'zod';
   import { supabase } from '$lib/supabase';
   import { goto } from '$app/navigation';
-  import type { State, EventType, ParticipantType, ParticipantMeasure, PoliceMeasure, NotesOption, ProtestData, IncidentStatus, JunctionOption } from '$lib/types/database';
+  import type { State, EventType, ParticipantType, ParticipantMeasure, PoliceMeasure, NotesOption, ProtestData, JunctionOption } from '$lib/types/database';
+  import { protestFormSchema, type ProtestFormSchema } from '$lib/types/schemas';
 
   // Fetch lookup data
   let states: State[] = [];
@@ -49,53 +49,6 @@
   // Load data on component mount
   loadLookupData();
 
-  // Form schema
-  const incidentStatusSchema = z.enum(['yes', 'no']);
-  
-  const schema = z.object({
-    // Basic info
-    date_of_event: z.string().min(1, 'Date is required'),
-    locality: z.string().min(1, 'City is required'),
-    state_code: z.string().min(1, 'State is required'),
-    location_name: z.string().optional(),
-    title: z.string().min(1, 'Event title is required'),
-    organization_name: z.string().optional(),
-    notable_participants: z.string().optional(),
-    targets: z.string().optional(),
-    claims_summary: z.string().optional(),
-    claims_verbatim: z.string().optional(),
-    macroevent: z.string().optional(),
-    is_online: z.boolean(),
-    
-    // Crowd size - number inputs return numbers, must be integers
-    crowd_size_low: z.number().int().min(0).optional(),
-    crowd_size_high: z.number().int().min(0).optional(),
-    
-    // Multi-select arrays - form sends strings for checkbox values
-    event_types: z.array(z.union([z.string(), z.literal('other')])),
-    participant_types: z.array(z.string()),
-    participant_measures: z.array(z.union([z.string(), z.literal('other')])),
-    police_measures: z.array(z.union([z.string(), z.literal('other')])),
-    notes: z.array(z.union([z.string(), z.literal('other')])),
-    
-    // Incident fields
-    participant_injury: incidentStatusSchema,
-    participant_injury_details: z.string().optional(),
-    police_injury: incidentStatusSchema,
-    police_injury_details: z.string().optional(),
-    arrests: incidentStatusSchema,
-    arrests_details: z.string().optional(),
-    property_damage: incidentStatusSchema,
-    property_damage_details: z.string().optional(),
-    participant_casualties: incidentStatusSchema,
-    participant_casualties_details: z.string().optional(),
-    police_casualties: incidentStatusSchema,
-    police_casualties_details: z.string().optional(),
-    
-    // Sources
-    sources: z.string().optional()
-  });
-
   // Track "other" values
   let eventTypeOthers: Record<string, string> = {};
   let participantMeasureOthers: Record<string, string> = {};
@@ -104,12 +57,9 @@
 
   // Track whether to show validation errors
   let showValidationErrors = false;
-
-  // Infer type from schema for better type safety
-  type SchemaType = z.infer<typeof schema>;
   
   // Form handling
-  const { form, errors, isSubmitting } = createForm<SchemaType>({
+  const { form, errors, isSubmitting } = createForm<ProtestFormSchema>({
     initialValues: {
       // Required fields
       date_of_event: '',
@@ -131,7 +81,7 @@
       participant_casualties: 'no',
       police_casualties: 'no'
     },
-    extend: validator({ schema }),
+    extend: validator({ schema: protestFormSchema }),
     onSubmit: async (values) => {
       try {
         // Prepare data for submission
