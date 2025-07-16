@@ -23,12 +23,12 @@ export const protestFormSchema = z.object({
   crowd_size_low: z.number().int().min(0).optional().nullable(),
   crowd_size_high: z.number().int().min(0).optional().nullable(),
   
-  // Multi-select arrays
-  event_types: z.array(z.union([z.string(), z.literal('other')])).default([]),
+  // Multi-select arrays (ids are stringified numbers; 0 represents "Other")
+  event_types: z.array(z.string()).default([]),
   participant_types: z.array(z.string()).default([]),
-  participant_measures: z.array(z.union([z.string(), z.literal('other')])).default([]),
-  police_measures: z.array(z.union([z.string(), z.literal('other')])).default([]),
-  notes: z.array(z.union([z.string(), z.literal('other')])).default([]),
+  participant_measures: z.array(z.string()).default([]),
+  police_measures: z.array(z.string()).default([]),
+  notes: z.array(z.string()).default([]),
   
   // Incident fields
   participant_injury: incidentStatusSchema.default('no'),

@@ -17,11 +17,11 @@
 
   // (client-side lookup fetching removed – now handled in +page.server.ts)
 
-  // Track "other" values
-  let eventTypeOthers: Record<string, string> = {};
-  let participantMeasureOthers: Record<string, string> = {};
-  let policeMeasureOthers: Record<string, string> = {};
-  let notesOthers: Record<string, string> = {};
+  // Track "other" values (use numeric key 0 instead of string "other")
+  let eventTypeOthers: Record<number, string> = {};
+  let participantMeasureOthers: Record<number, string> = {};
+  let policeMeasureOthers: Record<number, string> = {};
+  let notesOthers: Record<number, string> = {};
 
   // Track whether to show validation errors
   let showValidationErrors = false;
@@ -84,29 +84,41 @@
         };
 
         // Prepare junction table data - convert string IDs to numbers
-        const eventTypesData: JunctionOption[] = values.event_types.map(id => ({
-          id: id === 'other' ? null : parseInt(id),
-          other: id === 'other' ? eventTypeOthers['other'] : null
-        }));
+        const eventTypesData: JunctionOption[] = values.event_types.map((id) => {
+          const numId = parseInt(id);
+          return {
+            id: numId,
+            other: numId === 0 ? eventTypeOthers[0] : null
+          };
+        });
 
         const participantTypesData: { id: number }[] = values.participant_types.map(id => ({ 
           id: parseInt(id) 
         }));
 
-        const participantMeasuresData: JunctionOption[] = values.participant_measures.map(id => ({
-          id: id === 'other' ? null : parseInt(id),
-          other: id === 'other' ? participantMeasureOthers['other'] : null
-        }));
+        const participantMeasuresData: JunctionOption[] = values.participant_measures.map((id) => {
+          const numId = parseInt(id);
+          return {
+            id: numId,
+            other: numId === 0 ? participantMeasureOthers[0] : null
+          };
+        });
 
-        const policeMeasuresData: JunctionOption[] = values.police_measures.map(id => ({
-          id: id === 'other' ? null : parseInt(id),
-          other: id === 'other' ? policeMeasureOthers['other'] : null
-        }));
+        const policeMeasuresData: JunctionOption[] = values.police_measures.map((id) => {
+          const numId = parseInt(id);
+          return {
+            id: numId,
+            other: numId === 0 ? policeMeasureOthers[0] : null
+          };
+        });
 
-        const notesData: JunctionOption[] = values.notes.map(id => ({
-          id: id === 'other' ? null : parseInt(id),
-          other: id === 'other' ? notesOthers['other'] : null
-        }));
+        const notesData: JunctionOption[] = values.notes.map((id) => {
+          const numId = parseInt(id);
+          return {
+            id: numId,
+            other: numId === 0 ? notesOthers[0] : null
+          };
+        });
 
         // Submit using the database function
         const { data, error } = await supabase.rpc('submit_protest', {
@@ -256,6 +268,7 @@
       </label>
       <div class="space-y-2 max-h-60 overflow-y-auto border rounded p-2">
         {#each eventTypes as eventType}
+          {#if eventType.id !== 0}
           <label class="flex items-center">
             <input
               type="checkbox"
@@ -265,19 +278,20 @@
             />
             <span class="ml-2 text-sm">{eventType.name}</span>
           </label>
+          {/if}
         {/each}
         <label class="flex items-start">
           <input
             type="checkbox"
             name="event_types"
-            value="other"
+            value="0"
             class="rounded border-gray-300 text-blue-600 mt-1"
           />
           <div class="ml-2 flex-1">
             <span class="text-sm">Other:</span>
             <input
               type="text"
-              bind:value={eventTypeOthers['other']}
+              bind:value={eventTypeOthers[0]}
               class="mt-1 block w-full text-sm rounded-md border-gray-300"
               placeholder="Specify other event type"
             />
@@ -449,6 +463,7 @@
       </label>
       <div class="space-y-2 max-h-60 overflow-y-auto border rounded p-2">
         {#each participantMeasures as measure}
+          {#if measure.id !== 0}
           <label class="flex items-center">
             <input
               type="checkbox"
@@ -458,19 +473,20 @@
             />
             <span class="ml-2 text-sm">{measure.name}</span>
           </label>
+          {/if}
         {/each}
         <label class="flex items-start">
           <input
             type="checkbox"
             name="participant_measures"
-            value="other"
+            value="0"
             class="rounded border-gray-300 text-blue-600 mt-1"
           />
           <div class="ml-2 flex-1">
             <span class="text-sm">Other:</span>
             <input
               type="text"
-              bind:value={participantMeasureOthers['other']}
+              bind:value={participantMeasureOthers[0]}
               class="mt-1 block w-full text-sm rounded-md border-gray-300"
               placeholder="Specify other measure"
             />
@@ -486,6 +502,7 @@
       </label>
       <div class="space-y-2 max-h-60 overflow-y-auto border rounded p-2">
         {#each policeMeasures as measure}
+          {#if measure.id !== 0}
           <label class="flex items-center">
             <input
               type="checkbox"
@@ -495,19 +512,20 @@
             />
             <span class="ml-2 text-sm">{measure.name}</span>
           </label>
+          {/if}
         {/each}
         <label class="flex items-start">
           <input
             type="checkbox"
             name="police_measures"
-            value="other"
+            value="0"
             class="rounded border-gray-300 text-blue-600 mt-1"
           />
           <div class="ml-2 flex-1">
             <span class="text-sm">Other:</span>
             <input
               type="text"
-              bind:value={policeMeasureOthers['other']}
+              bind:value={policeMeasureOthers[0]}
               class="mt-1 block w-full text-sm rounded-md border-gray-300"
               placeholder="Specify other measure"
             />
@@ -548,6 +566,7 @@
       </label>
       <div class="space-y-2 max-h-60 overflow-y-auto border rounded p-2">
         {#each notesOptions as note}
+          {#if note.id !== 0}
           <label class="flex items-center">
             <input
               type="checkbox"
@@ -557,19 +576,20 @@
             />
             <span class="ml-2 text-sm">{note.name}</span>
           </label>
+          {/if}
         {/each}
         <label class="flex items-start">
           <input
             type="checkbox"
             name="notes"
-            value="other"
+            value="0"
             class="rounded border-gray-300 text-blue-600 mt-1"
           />
           <div class="ml-2 flex-1">
             <span class="text-sm">Other:</span>
             <input
               type="text"
-              bind:value={notesOthers['other']}
+              bind:value={notesOthers[0]}
               class="mt-1 block w-full text-sm rounded-md border-gray-300"
               placeholder="Specify other note"
             />

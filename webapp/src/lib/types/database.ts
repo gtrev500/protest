@@ -39,12 +39,12 @@ export interface FormValues {
   crowd_size_low?: string;
   crowd_size_high?: string;
   
-  // Multi-select arrays
-  event_types: (number | 'other')[];
+  // Multi-select arrays (0 represents "Other")
+  event_types: number[];
   participant_types: number[];
-  participant_measures: (number | 'other')[];
-  police_measures: (number | 'other')[];
-  notes: (number | 'other')[];
+  participant_measures: number[];
+  police_measures: number[];
+  notes: number[];
   
   // Incident fields
   participant_injury: IncidentStatus;
