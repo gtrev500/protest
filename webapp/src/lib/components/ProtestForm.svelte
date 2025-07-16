@@ -6,6 +6,7 @@
   import { goto } from '$app/navigation';
   import type { State, EventType, ParticipantType, ParticipantMeasure, PoliceMeasure, NotesOption, ProtestData, JunctionOption } from '$lib/types/database';
   import { protestFormSchema, type ProtestFormSchema } from '$lib/types/schemas';
+  import OtherInput from '$lib/components/OtherInput.svelte';
 
   // Lookup data is provided via props from the page's load() function (SSR)
   export let states: State[] = [];
@@ -280,23 +281,11 @@
           </label>
           {/if}
         {/each}
-        <label class="flex items-start">
-          <input
-            type="checkbox"
-            name="event_types"
-            value="0"
-            class="rounded border-gray-300 text-blue-600 mt-1"
-          />
-          <div class="ml-2 flex-1">
-            <span class="text-sm">Other:</span>
-            <input
-              type="text"
-              bind:value={eventTypeOthers[0]}
-              class="mt-1 block w-full text-sm rounded-md border-gray-300"
-              placeholder="Specify other event type"
-            />
-          </div>
-        </label>
+        <OtherInput
+          checkboxName="event_types"
+          bind:otherText={eventTypeOthers[0]}
+          placeholder="Specify other event type"
+        />
       </div>
     </div>
 
@@ -475,23 +464,11 @@
           </label>
           {/if}
         {/each}
-        <label class="flex items-start">
-          <input
-            type="checkbox"
-            name="participant_measures"
-            value="0"
-            class="rounded border-gray-300 text-blue-600 mt-1"
-          />
-          <div class="ml-2 flex-1">
-            <span class="text-sm">Other:</span>
-            <input
-              type="text"
-              bind:value={participantMeasureOthers[0]}
-              class="mt-1 block w-full text-sm rounded-md border-gray-300"
-              placeholder="Specify other measure"
-            />
-          </div>
-        </label>
+        <OtherInput
+          checkboxName="participant_measures"
+          bind:otherText={participantMeasureOthers[0]}
+          placeholder="Specify other measure"
+        />
       </div>
     </div>
 
@@ -514,23 +491,11 @@
           </label>
           {/if}
         {/each}
-        <label class="flex items-start">
-          <input
-            type="checkbox"
-            name="police_measures"
-            value="0"
-            class="rounded border-gray-300 text-blue-600 mt-1"
-          />
-          <div class="ml-2 flex-1">
-            <span class="text-sm">Other:</span>
-            <input
-              type="text"
-              bind:value={policeMeasureOthers[0]}
-              class="mt-1 block w-full text-sm rounded-md border-gray-300"
-              placeholder="Specify other measure"
-            />
-          </div>
-        </label>
+        <OtherInput
+          checkboxName="police_measures"
+          bind:otherText={policeMeasureOthers[0]}
+          placeholder="Specify other measure"
+        />
       </div>
     </div>
 
@@ -578,23 +543,11 @@
           </label>
           {/if}
         {/each}
-        <label class="flex items-start">
-          <input
-            type="checkbox"
-            name="notes"
-            value="0"
-            class="rounded border-gray-300 text-blue-600 mt-1"
-          />
-          <div class="ml-2 flex-1">
-            <span class="text-sm">Other:</span>
-            <input
-              type="text"
-              bind:value={notesOthers[0]}
-              class="mt-1 block w-full text-sm rounded-md border-gray-300"
-              placeholder="Specify other note"
-            />
-          </div>
-        </label>
+        <OtherInput
+          checkboxName="notes"
+          bind:otherText={notesOthers[0]}
+          placeholder="Specify other note"
+        />
       </div>
     </div>
 
