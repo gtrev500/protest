@@ -7,47 +7,15 @@
   import type { State, EventType, ParticipantType, ParticipantMeasure, PoliceMeasure, NotesOption, ProtestData, JunctionOption } from '$lib/types/database';
   import { protestFormSchema, type ProtestFormSchema } from '$lib/types/schemas';
 
-  // Fetch lookup data
-  let states: State[] = [];
-  let eventTypes: EventType[] = [];
-  let participantTypes: ParticipantType[] = [];
-  let participantMeasures: ParticipantMeasure[] = [];
-  let policeMeasures: PoliceMeasure[] = [];
-  let notesOptions: NotesOption[] = [];
+  // Lookup data is provided via props from the page's load() function (SSR)
+  export let states: State[] = [];
+  export let eventTypes: EventType[] = [];
+  export let participantTypes: ParticipantType[] = [];
+  export let participantMeasures: ParticipantMeasure[] = [];
+  export let policeMeasures: PoliceMeasure[] = [];
+  export let notesOptions: NotesOption[] = [];
 
-  // Load option data on component mount
-  async function loadLookupData() {
-    try {
-      const [statesRes, eventTypesRes, participantTypesRes, participantMeasuresRes, policeMeasuresRes, notesRes] = await Promise.all([
-        supabase.from('states').select('*').order('name'),
-        supabase.from('event_types').select('*').order('name'),
-        supabase.from('participant_types').select('*').order('name'),
-        supabase.from('participant_measures').select('*').order('name'),
-        supabase.from('police_measures').select('*').order('name'),
-        supabase.from('notes_options').select('*').order('name')
-      ]);
-
-      // Log any errors
-      if (statesRes.error) console.error('Error loading states:', statesRes.error);
-      if (eventTypesRes.error) console.error('Error loading event types:', eventTypesRes.error);
-      if (participantTypesRes.error) console.error('Error loading participant types:', participantTypesRes.error);
-      if (participantMeasuresRes.error) console.error('Error loading participant measures:', participantMeasuresRes.error);
-      if (policeMeasuresRes.error) console.error('Error loading police measures:', policeMeasuresRes.error);
-      if (notesRes.error) console.error('Error loading notes options:', notesRes.error);
-
-      states = statesRes.data || [];
-      eventTypes = eventTypesRes.data || [];
-      participantTypes = participantTypesRes.data || [];
-      participantMeasures = participantMeasuresRes.data || [];
-      policeMeasures = policeMeasuresRes.data || [];
-      notesOptions = notesRes.data || [];
-    } catch (error) {
-      console.error('Error in loadLookupData:', error);
-    }
-  }
-
-  // Load data on component mount
-  loadLookupData();
+  // (client-side lookup fetching removed – now handled in +page.server.ts)
 
   // Track "other" values
   let eventTypeOthers: Record<string, string> = {};
@@ -429,7 +397,7 @@
       </label>
     </div>
 
-    <!-- Crowd Size -->
+    <!-- Crowd Size --> 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
         <label for="crowd_size_low" class="block text-sm font-medium text-gray-700">
