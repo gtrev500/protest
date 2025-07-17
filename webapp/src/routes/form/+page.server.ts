@@ -9,7 +9,11 @@ import type {
   NotesOption
 } from '$lib/types/database';
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ setHeaders }) => {
+  // Cache for 1 hour on CDN, 5 minutes in browser
+  setHeaders({
+    'cache-control': 'public, s-maxage=3600, max-age=300, stale-while-revalidate=86400'
+  });
   const [
     statesRes,
     eventTypesRes,

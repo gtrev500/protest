@@ -25,3 +25,5 @@ vite.config.ts.timestamp-*
 # Environment variables
 .env
 .env.local
+
+dev.sh // tmux dev environment
