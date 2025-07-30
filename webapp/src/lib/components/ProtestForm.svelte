@@ -295,6 +295,9 @@
           placeholder="Specify other event type"
         />
       </div>
+      <p class="mt-1 text-xs text-gray-500 italic">
+        *These actions may qualify as long as participants articulate grievances around broader political issues.
+      </p>
     </div>
 
     <!-- Organization Name -->
