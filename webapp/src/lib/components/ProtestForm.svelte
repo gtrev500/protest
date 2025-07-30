@@ -8,6 +8,11 @@
   import { protestFormSchema, type ProtestFormSchema } from '$lib/types/schemas';
   import OtherInput from '$lib/components/OtherInput.svelte';
 
+  // Utility function to capitalize first letter
+  function capitalize(str: string): string {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+
   // Lookup data is provided via props from the page's load() function (SSR)
   export let states: State[] = [];
   export let eventTypes: EventType[] = [];
@@ -277,7 +282,7 @@
               value={eventType.id}
               class="rounded border-gray-300 text-blue-600"
             />
-            <span class="ml-2 text-sm">{eventType.name}</span>
+            <span class="ml-2 text-sm">{capitalize(eventType.name)}</span>
           </label>
           {/if}
         {/each}
@@ -316,7 +321,7 @@
               value={pType.id}
               class="rounded border-gray-300 text-blue-600"
             />
-            <span class="ml-2 text-sm">{pType.name}</span>
+            <span class="ml-2 text-sm">{capitalize(pType.name)}</span>
           </label>
         {/each}
       </div>
@@ -460,7 +465,7 @@
               value={measure.id}
               class="rounded border-gray-300 text-blue-600"
             />
-            <span class="ml-2 text-sm">{measure.name}</span>
+            <span class="ml-2 text-sm">{capitalize(measure.name)}</span>
           </label>
           {/if}
         {/each}
@@ -487,7 +492,7 @@
               value={measure.id}
               class="rounded border-gray-300 text-blue-600"
             />
-            <span class="ml-2 text-sm">{measure.name}</span>
+            <span class="ml-2 text-sm">{capitalize(measure.name)}</span>
           </label>
           {/if}
         {/each}
@@ -539,7 +544,7 @@
               value={note.id}
               class="rounded border-gray-300 text-blue-600"
             />
-            <span class="ml-2 text-sm">{note.name}</span>
+            <span class="ml-2 text-sm">{capitalize(note.name)}</span>
           </label>
           {/if}
         {/each}
