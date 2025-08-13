@@ -97,9 +97,9 @@
 </script>
 
 <div class="max-w-7xl mx-auto p-6">
-  <h1 class="text-3xl font-bold mb-8">Protest Tracker Dashboard</h1>
+  <h1 class="text-3xl font-bold mb-8">Protest Tracker Log</h1>
 
-  <!-- Statistics Cards -->
+  <!-- Statistics Cards
   {#if stats}
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
       <div class="bg-white rounded-lg shadow p-6">
@@ -122,7 +122,7 @@
         <p class="text-3xl font-bold text-purple-600">{formatNumber(stats.states_count)}</p>
       </div>
     </div>
-  {/if}
+  {/if} -->
 
   <!-- Filters -->
   <div class="bg-white rounded-lg shadow p-6 mb-6">
