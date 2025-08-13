@@ -11,7 +11,7 @@
 	const navLinks = [
 		{ href: '/', label: 'Home' },
 		{ href: '/form', label: 'Submit' },
-		{ href: '/log', label: 'Log' }
+		{ href: '/log', label: 'Submission Log' }
 	];
 </script>
 
