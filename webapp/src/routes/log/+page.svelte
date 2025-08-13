@@ -3,7 +3,7 @@
 </script>
 
 <svelte:head>
-  <title>Dashboard | Protest Tracker</title>
+  <title>Log | Protest Tracker</title>
 </svelte:head>
 
 <ProtestDashboard />

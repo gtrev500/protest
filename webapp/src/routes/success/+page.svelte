@@ -52,10 +52,10 @@
           Submit Another Protest
         </a>
         <a
-          href="/dashboard"
+          href="/log"
           class="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
         >
-          View Dashboard
+          View Log
         </a>
         {#if protestId}
           <a

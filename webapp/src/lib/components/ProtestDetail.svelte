@@ -56,15 +56,15 @@
     <div class="text-center py-12">
       <h2 class="text-2xl font-bold text-gray-900">Protest not found</h2>
       <p class="mt-1 text-gray-500">The protest you're looking for doesn't exist.</p>
-      <a href="/dashboard" class="mt-4 inline-block text-blue-600 hover:text-blue-900">
-        ← Back to dashboard
+      <a href="/log" class="mt-4 inline-block text-blue-600 hover:text-blue-900">
+        ← Back to Log
       </a>
     </div>
   {:else}
     <!-- Header -->
     <div class="mb-6">
-      <a href="/dashboard" class="text-blue-600 hover:text-blue-900 mb-4 inline-block">
-        ← Back to dashboard
+      <a href="/log" class="text-blue-600 hover:text-blue-900 mb-4 inline-block">
+        ← Back to Log
       </a>
       <h1 class="text-3xl font-bold text-gray-900">{protest.title}</h1>
       <p class="text-lg text-gray-600 mt-1">
