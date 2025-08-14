@@ -1,8 +1,8 @@
 <svelte:head>
-  <title>Protest Tracker</title>
+	<title>Protest Tracker</title>
 </svelte:head>
 
-{#snippet actionButton(href: string, isPrimary: boolean, text: string)}
+{#snippet actionButton(href, isPrimary, text)}
 	<a
 		href={href}
 		class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md {isPrimary ? 'text-white bg-blue-600 hover:bg-blue-700' : 'text-blue-600 bg-white hover:bg-gray-50'} md:py-4 md:text-lg md:px-10"
@@ -11,7 +11,7 @@
 	</a>
 {/snippet}
 
-{#snippet featureCard(iconPath: string, title: string, description: string)}
+{#snippet featureCard(iconPath, title, description)}
 	<div class="bg-white overflow-hidden shadow rounded-lg">
 		<div class="px-4 py-5 sm:p-6">
 			<div class="flex items-center">
