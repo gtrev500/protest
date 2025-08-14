@@ -1,5 +1,6 @@
 <script lang="ts">
   import OtherInput from '../OtherInput.svelte';
+  import { capitalize } from '$lib/utils/string';
 
   interface Option {
     id: number;
@@ -15,6 +16,7 @@
     showOther?: boolean;
     otherPlaceholder?: string;
     supplementalInformation?: string;
+    autoCapitalize?: boolean;
     class?: string;
   }
 
@@ -27,6 +29,7 @@
     showOther = false,
     otherPlaceholder = 'Specify other',
     supplementalInformation = '',
+    autoCapitalize = true,
     class: className = ''
   }: Props = $props();
 </script>
@@ -46,7 +49,7 @@
             bind:group={values}
             class="rounded border-gray-300 text-blue-600"
           />
-          <span class="ml-2 text-sm">{option.name}</span>
+          <span class="ml-2 text-sm">{autoCapitalize ? capitalize(option.name) : option.name}</span>
         </label>
       {/if}
     {/each}
