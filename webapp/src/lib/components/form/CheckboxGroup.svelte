@@ -14,6 +14,7 @@
     otherValue?: string;
     showOther?: boolean;
     otherPlaceholder?: string;
+    supplementalInformation?: string;
     class?: string;
   }
 
@@ -25,6 +26,7 @@
     otherValue = $bindable(''),
     showOther = false,
     otherPlaceholder = 'Specify other',
+    supplementalInformation = '',
     class: className = ''
   }: Props = $props();
 </script>
@@ -56,4 +58,9 @@
       />
     {/if}
   </div>
+  {#if supplementalInformation}
+    <p class="mt-1 text-xs text-gray-500 italic">
+      {supplementalInformation}
+    </p>
+  {/if}
 </div>

@@ -19,8 +19,8 @@
   showOther
   bind:otherValue={eventTypeOther}
   otherPlaceholder="Specify other event type"
+  supplementalInformation="*These actions may qualify as long as participants articulate grievances around broader political issues."
 />
-
 <TextField
   name="organization_name"
   label="Organization Name"
