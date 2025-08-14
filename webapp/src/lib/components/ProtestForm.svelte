@@ -34,6 +34,10 @@
   // Track whether to show validation errors
   let showValidationErrors = false;
   
+  // Track online event state to conditionally show crowd size
+  //let isOnline = $state(false);
+  let isOnline = false;
+  
   // Form handling
   const { form, errors, isSubmitting } = createForm<ProtestFormSchema>({
     initialValues: {
@@ -144,8 +148,22 @@
     <!-- Claims -->
     <ClaimsSection />
 
-    <!-- Crowd Size -->
-    <CrowdSizeSection />
+    <!-- Online Event Checkbox -->
+    <div>
+      <label class="flex items-center">
+        <input
+          type="checkbox"
+          name="is_online"
+          bind:checked={isOnline}
+          class="rounded border-gray-300 text-blue-600"
+        />
+        <span class="ml-2 text-sm font-medium">This was an online event</span>
+      </label>
+    </div>
+    <!-- Crowd Size (only show for non-online events) -->
+    {#if !isOnline}
+      <CrowdSizeSection />
+    {/if}
 
     <!-- Measures -->
     <MeasuresSection

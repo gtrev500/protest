@@ -47,14 +47,3 @@
   label="Macroevent (if part of a larger event)"
   placeholder="e.g., Women's March, Trump Inauguration protests, etc."
 />
-
-<div>
-  <label class="flex items-center">
-    <input
-      type="checkbox"
-      name="is_online"
-      class="rounded border-gray-300 text-blue-600"
-    />
-    <span class="ml-2 text-sm font-medium">This was an online event</span>
-  </label>
-</div>
