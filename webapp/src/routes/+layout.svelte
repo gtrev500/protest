@@ -96,7 +96,7 @@
 	<footer class="bg-white mt-auto">
 		<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
 			<p class="text-center text-sm text-gray-500">
-				© 2024 Protest Tracker. A tool for documenting civic engagement.
+				2025 Protest Tracker. A tool for documenting civic engagement.
 			</p>
 		</div>
 	</footer>
