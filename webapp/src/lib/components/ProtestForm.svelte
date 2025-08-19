@@ -172,7 +172,7 @@
         label="Crowd Counting Method"
         placeholder="e.g. sign-ins, counting through distributing flyers/handouts"
         required={!isOnline} 
-        error={errors.count_method as string | null}
+        error={$errors.count_method as string | null}
       />
       <CrowdSizeSection />
 

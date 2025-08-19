@@ -46,6 +46,24 @@ export const protestFormSchema = z.object({
   
   // Sources
   sources: z.string().optional()
+}).superRefine((data, ctx) => {
+  // Validation for in-person events
+  if (!data.is_online) {
+    // Count method is required for in-person events
+    if (!data.count_method?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Crowd counting method is required for in-person events',
+        path: ['count_method']
+      });
+    }
+    
+    // Additional in-person event validations can be added here
+    // For example, crowd size validations could be added if needed
+  }
+  
+  // Future: Add other conditional validations here as needed
+  // This keeps all complex validation logic in one organized place
 });
 
 // Infer the type from the schema for use in the component
