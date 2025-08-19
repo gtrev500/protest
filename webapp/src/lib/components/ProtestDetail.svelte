@@ -95,12 +95,19 @@
           <dt class="text-sm font-medium text-gray-500">Online Event</dt>
           <dd class="mt-1 text-sm text-gray-900">{protest.is_online ? 'Yes' : 'No'}</dd>
         </div>
-        
         {#if protest.crowd_size_low || protest.crowd_size_high}
           <div>
             <dt class="text-sm font-medium text-gray-500">Estimated Attendance</dt>
             <dd class="mt-1 text-sm text-gray-900">
               {formatNumber(protest.crowd_size_low)} - {formatNumber(protest.crowd_size_high)} participants
+            </dd>
+          </div>
+        {/if}
+        {#if protest.count_method}
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Crowd Counting Method</dt>
+            <dd class="mt-1 text-sm text-gray-900">
+              {protest.count_method}
             </dd>
           </div>
         {/if}
