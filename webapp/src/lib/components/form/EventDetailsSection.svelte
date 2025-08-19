@@ -39,7 +39,8 @@
 
 <TextField
   name="targets"
-  label="Targets (e.g., Trump, Musk, ICE, etc)"
+  label="Target(s) or Focal Point(s)"
+  placeholder="e.g. Trump, Musk, ICE"
 />
 
 <TextField
