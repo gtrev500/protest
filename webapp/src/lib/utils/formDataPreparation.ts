@@ -22,6 +22,7 @@ export function prepareProtestData(values: ProtestFormSchema): ProtestData {
     claims_verbatim: values.claims_verbatim,
     macroevent: values.macroevent,
     is_online: values.is_online,
+    count_method: values.count_method,
     crowd_size_low: values.crowd_size_low || null,
     crowd_size_high: values.crowd_size_high || null,
     participant_injury: values.participant_injury,

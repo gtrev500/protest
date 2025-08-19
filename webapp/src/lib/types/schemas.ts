@@ -22,7 +22,7 @@ export const protestFormSchema = z.object({
   // Crowd size - using nullable to handle empty inputs, which Felte treats as undefined
   crowd_size_low: z.number().int().min(0).optional().nullable(),
   crowd_size_high: z.number().int().min(0).optional().nullable(),
-  
+  count_method: z.string().optional(),
   // Multi-select arrays (ids are stringified numbers; 0 represents "Other")
   event_types: z.array(z.string()).default([]),
   participant_types: z.array(z.string()).default([]),

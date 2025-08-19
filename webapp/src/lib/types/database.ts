@@ -78,6 +78,7 @@ export interface ProtestData {
   claims_verbatim?: string;
   macroevent?: string;
   is_online: boolean;
+  count_method?: string;
   crowd_size_low: number | null;
   crowd_size_high: number | null;
   participant_injury: IncidentStatus;

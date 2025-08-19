@@ -9,6 +9,7 @@
   import { prepareSubmissionData } from '$lib/utils/formDataPreparation';
   
   // Form sections
+  import TextField from './form/TextField.svelte';
   import BasicInfoSection from './form/BasicInfoSection.svelte';
   import EventDetailsSection from './form/EventDetailsSection.svelte';
   import ClaimsSection from './form/ClaimsSection.svelte';
@@ -56,6 +57,7 @@
       claims_verbatim: '',
       macroevent: '',
       is_online: false,
+      count_method: '',
       crowd_size_low: null,
       crowd_size_high: null,
       sources: '',
@@ -160,11 +162,21 @@
         <span class="ml-2 text-sm font-medium">This was an online event</span>
       </label>
     </div>
+
     <!-- Crowd Size (only show for non-online events) -->
     {#if !isOnline}
+    
+      <!-- Crowd Counting Method -->
+      <TextField
+        name="count_method"
+        label="Crowd Counting Method"
+        placeholder="e.g. sign-ins, counting through distributing flyers/handouts"
+        required={!isOnline} 
+        error={errors.count_method as string | null}
+      />
       <CrowdSizeSection />
-    {/if}
 
+    {/if}
     <!-- Measures -->
     <MeasuresSection
       {participantMeasures}
