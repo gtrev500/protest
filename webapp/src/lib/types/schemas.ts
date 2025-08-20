@@ -10,7 +10,7 @@ export const protestFormSchema = z.object({
   locality: z.string().min(1, 'City is required'),
   state_code: z.string().min(1, 'State is required'),
   location_name: z.string().optional(),
-  title: z.string().min(1, 'Event title is required'),
+  title: z.string().optional(),
   organization_name: z.string().optional(),
   notable_participants: z.string().optional(),
   targets: z.string().optional(),

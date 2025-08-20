@@ -46,8 +46,6 @@
 <TextField
   name="title"
   label="Title of Event"
-  required
-  error={errors.title as string | null}
 />
 
 <TextField
