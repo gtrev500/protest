@@ -1,6 +1,5 @@
 <script lang="ts">
   import CheckboxGroup from './CheckboxGroup.svelte';
-  import TextArea from './TextArea.svelte';
   import type { NotesOption } from '$lib/types/database';
 
   interface Props {
@@ -18,10 +17,4 @@
   showOther
   bind:otherValue={notesOther}
   otherPlaceholder="Specify other note"
-/>
-
-<TextArea
-  name="sources"
-  label="Sources"
-  placeholder="Include links to news articles, social media posts, etc."
 />

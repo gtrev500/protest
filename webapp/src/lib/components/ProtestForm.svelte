@@ -9,6 +9,7 @@
   import { prepareSubmissionData } from '$lib/utils/formDataPreparation';
   
   // Form sections
+  import TextArea from './form/TextArea.svelte';
   import TextField from './form/TextField.svelte';
   import BasicInfoSection from './form/BasicInfoSection.svelte';
   import EventDetailsSection from './form/EventDetailsSection.svelte';
@@ -188,10 +189,17 @@
     <!-- Incidents -->
     <IncidentSection />
 
-    <!-- Notes and Sources -->
+    <!-- Notes -->
     <NotesSection
       {notesOptions}
       bind:notesOther={notesOthers[0]}
+    />
+    <TextArea
+      name="sources"
+      label="Source(s)"
+      required
+      placeholder="Include links to news articles, social media posts, etc."
+      error={$errors.sources as string | null}
     />
 
     <!-- Submit Button -->

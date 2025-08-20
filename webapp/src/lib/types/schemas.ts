@@ -45,7 +45,7 @@ export const protestFormSchema = z.object({
   police_casualties_details: z.string().optional(),
   
   // Sources
-  sources: z.string().optional()
+  sources: z.string().min(1, 'Source(s) are required')
 }).superRefine((data, ctx) => {
   // Validation for in-person events
   if (!data.is_online) {
