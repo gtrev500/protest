@@ -200,6 +200,7 @@
       required
       placeholder="Include links to news articles, social media posts, etc."
       error={$errors.sources as string | null}
+      supplementalInformation="We discourage you from sharing any personal information like your name or email address. Information entered here will be publicly available."
     />
 
     <!-- Submit Button -->

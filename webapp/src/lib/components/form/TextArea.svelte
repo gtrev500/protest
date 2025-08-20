@@ -8,6 +8,7 @@
     placeholder?: string;
     rows?: number;
     class?: string;
+    supplementalInformation?: string;
   }
 
   let {
@@ -18,7 +19,8 @@
     required = false,
     placeholder = '',
     rows = 4,
-    class: className = ''
+    class: className = '',
+    supplementalInformation = ''
   }: Props = $props();
 </script>
 
@@ -38,5 +40,10 @@
   ></textarea>
   {#if error}
     <p class="mt-1 text-sm text-red-600">{error}</p>
+  {/if}
+  {#if supplementalInformation}
+    <p class="mt-1 text-xs text-gray-500 italic">
+      {supplementalInformation}
+    </p>
   {/if}
 </div>
