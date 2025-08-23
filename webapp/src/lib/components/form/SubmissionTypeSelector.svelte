@@ -11,7 +11,7 @@
     otherValue = $bindable('')
   }: Props = $props();
   
-  // Define submission types with icons for better visual hierarchy
+  // Define submission types with subtle icons
   const submissionTypes = [
     {
       id: 'new_record',
@@ -29,49 +29,62 @@
       id: 'data_correction',
       name: 'Data correction',
       description: 'Correct inaccurate information in an existing record',
-      icon: '✏️'
+      icon: '🔧'
     }
   ];
 </script>
 
-<div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 mb-6">
-  <div class="flex items-start mb-3">
-    <span class="text-blue-600 mr-2 text-lg">ℹ️</span>
-    <div class="flex-1">
-      <label class="block text-base font-semibold text-gray-800">
+<div class="bg-blue-50/50 rounded-lg p-4 mb-6">
+  <div class="flex items-center mb-3">
+    <span class="text-blue-600 mr-2">ℹ️</span>
+    <div>
+      <label class="text-sm font-medium text-gray-700">
         Which best describes your submission?
       </label>
-      <p class="text-sm text-gray-600 mt-1">Check all that apply</p>
+      <span class="text-sm text-gray-500 ml-2">Check all that apply</span>
     </div>
   </div>
   
-  <div class="space-y-3 bg-white rounded-lg p-3">
+  <div class="bg-white rounded p-3 border-1
+  ">
     {#each submissionTypes as type}
-      <label class="flex items-start p-2 rounded hover:bg-gray-50 transition-colors cursor-pointer">
+      <label class="flex items-start py-2 hover:bg-gray-50 rounded cursor-pointer">
         <input
           type="checkbox"
           name="submission_type"
           value={type.id}
           bind:group={values}
-          class="rounded border-gray-300 text-blue-600 mt-1"
+          class="rounded border-gray-300 text-blue-600 mt-0.5"
         />
-        <div class="ml-3 flex-1">
+        <div class="ml-3">
           <div class="flex items-center">
-            <span class="mr-2 text-lg">{type.icon}</span>
-            <span class="font-medium text-gray-900">{type.name}</span>
+            <span class="text-sm mr-1.5">{type.icon}</span>
+            <span class="text-sm text-gray-900">{type.name}</span>
           </div>
-          <p class="text-xs text-gray-500 mt-0.5 ml-7">{type.description}</p>
+          <p class="text-xs text-gray-500 mt-0.5 ml-5">{type.description}</p>
         </div>
       </label>
     {/each}
     
-    <div class="border-t pt-3 mt-3">
-      <OtherInput
-        checkboxName="submission_type"
-        bind:otherText={otherValue}
-        placeholder="Please describe your submission type"
-        class="bg-gray-50"
-      />
+    <div class="border-t mt-3 pt-3">
+      <label class="flex items-start">
+        <input
+          type="checkbox"
+          name="submission_type_other"
+          class="rounded border-gray-300 text-blue-600 mt-0.5"
+        />
+        <div class="ml-3 flex-1">
+          <span class="text-sm text-gray-900">Other:</span>
+          {#if !!otherValue || values.includes('other')}
+            <input
+              type="text"
+              bind:value={otherValue}
+              placeholder="Please describe"
+              class="mt-1 w-full text-sm border-gray-300 rounded-md"
+            />
+          {/if}
+        </div>
+      </label>
     </div>
   </div>
 </div>
