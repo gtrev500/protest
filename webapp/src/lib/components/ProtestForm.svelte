@@ -11,6 +11,7 @@
   // Form sections
   import TextArea from './form/TextArea.svelte';
   import TextField from './form/TextField.svelte';
+  import SubmissionTypeSelector from './form/SubmissionTypeSelector.svelte';
   import BasicInfoSection from './form/BasicInfoSection.svelte';
   import EventDetailsSection from './form/EventDetailsSection.svelte';
   import ClaimsSection from './form/ClaimsSection.svelte';
@@ -140,6 +141,9 @@
   <form use:form class="space-y-6">
     <!-- Basic Information -->
     <BasicInfoSection {states} errors={$errors} />
+
+    <!-- Submission Type -->
+    <SubmissionTypeSelector />
 
     <!-- Event Details -->
     <EventDetailsSection 
