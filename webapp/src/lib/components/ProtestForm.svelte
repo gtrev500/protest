@@ -4,6 +4,7 @@
   import { validator } from '@felte/validator-zod';
   import { supabase } from '$lib/supabase';
   import { goto } from '$app/navigation';
+  import { Turnstile } from 'svelte-turnstile';
   import type { State, EventType, ParticipantType, ParticipantMeasure, PoliceMeasure, NotesOption } from '$lib/types/database';
   import { protestFormSchema, type ProtestFormSchema } from '$lib/types/schemas';
   import { prepareSubmissionData } from '$lib/utils/formDataPreparation';
@@ -40,6 +41,12 @@
   //let isOnline = $state(false);
   let isOnline = false;
   
+  // Turnstile token
+  let turnstileToken = '';
+  let turnstileError = false;
+  
+  // Get the site key with proper error handling
+  const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;  
   // Form handling
   const { form, errors, isSubmitting } = createForm<ProtestFormSchema>({
     initialValues: {
@@ -87,6 +94,26 @@
     extend: validator({ schema: protestFormSchema }),
     onSubmit: async (values) => {
       try {
+        // Validate Turnstile token first
+        if (!turnstileToken) {
+          turnstileError = true;
+          throw new Error('Please complete the CAPTCHA verification');
+        }
+
+        // Validate the token with the server
+        const turnstileValidation = await fetch('/api/validate-turnstile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: turnstileToken }),
+        });
+
+        const turnstileResult = await turnstileValidation.json();
+        
+        if (!turnstileResult.success) {
+          turnstileError = true;
+          throw new Error('CAPTCHA verification failed. Please try again.');
+        }
+
         // Prepare data for submission using the utility function
         const submissionData = prepareSubmissionData(values, {
           eventTypeOthers,
@@ -114,6 +141,7 @@
         goto(`/success?id=${data.id}`);
       } catch (error) {
         console.error('Error submitting protest:', error);
+        // Show error to user - you might want to add error state here
       }
     }
   });
@@ -202,6 +230,39 @@
       error={$errors.sources as string | null}
       supplementalInformation="We discourage you from sharing any personal information like your name or email address. Information entered here will be publicly available."
     />
+
+    <!-- Turnstile CAPTCHA -->
+    <div class="pt-4">
+      {#if siteKey}
+        <Turnstile
+          siteKey={siteKey}
+          on:turnstile-callback={(e) => {
+            console.log('Turnstile callback received:', e.detail);
+            turnstileToken = e.detail.token;
+            turnstileError = false;
+            console.log('Token set:', turnstileToken);
+          }}
+          on:turnstile-error={(e) => {
+            console.error('Turnstile error:', e.detail);
+            turnstileError = true;
+            turnstileToken = '';
+          }}
+          on:turnstile-expired={() => {
+            console.log('Turnstile expired');
+            turnstileToken = '';
+          }}
+          theme="light"
+          size="normal"
+        />
+        {#if turnstileError}
+          <p class="mt-2 text-sm text-red-600">Please complete the CAPTCHA verification</p>
+        {/if}
+      {:else}
+        <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+          <p class="text-sm text-yellow-800">CAPTCHA not configured. Please set VITE_TURNSTILE_SITE_KEY in your environment variables.</p>
+        </div>
+      {/if}
+    </div>
 
     <!-- Submit Button -->
     <div class="pt-4">
