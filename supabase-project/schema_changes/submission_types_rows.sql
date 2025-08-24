@@ -1,0 +1,1 @@
+INSERT INTO "public"."submission_types" ("id", "name") VALUES ('0', 'Other'), ('1', 'new record'), ('2', 'data correction'), ('3', 'updated or additional source for existing record');
