@@ -14,11 +14,12 @@ export class ProtestFormPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.cityInput = page.getByLabel('City');
-    this.stateSelect = page.getByLabel('State');
-    this.dateInput = page.getByLabel('Date');
-    this.onlineEventCheckbox = page.getByLabel('This was an online event');
-    this.countMethodInput = page.getByLabel('Crowd Counting Method');
+    // Use the actual form field names from the schema
+    this.cityInput = page.locator('input[name="locality"]');
+    this.stateSelect = page.locator('select[name="state_code"]');
+    this.dateInput = page.locator('input[name="date_of_event"]');
+    this.onlineEventCheckbox = page.locator('input[name="is_online"]');
+    this.countMethodInput = page.locator('input[name="count_method"]');
     this.sourcesTextarea = page.locator('textarea[name="sources"]');
     this.submitButton = page.getByRole('button', { name: /submit/i });
     this.errorContainer = page.locator('.bg-red-50');
@@ -29,9 +30,9 @@ export class ProtestFormPage {
     await this.page.goto('/form');
   }
 
-  async fillBasicInfo(city: string, stateIndex: number, date: string) {
+  async fillBasicInfo(city: string, stateValue: string, date: string) {
     await this.cityInput.fill(city);
-    await this.stateSelect.selectOption({ index: stateIndex });
+    await this.stateSelect.selectOption(stateValue);
     await this.dateInput.fill(date);
   }
 
@@ -75,18 +76,16 @@ export class ProtestFormPage {
     }
   }
 
-  async fillCrowdSize(low: string, best: string, high: string, method?: string) {
+  async fillCrowdSize(low: string, high: string, method?: string) {
     if (method) {
       await this.countMethodInput.fill(method);
     }
 
-    const lowEstimate = this.page.locator('input[name="low_estimate"]');
-    const bestEstimate = this.page.locator('input[name="best_estimate"]');
-    const highEstimate = this.page.locator('input[name="high_estimate"]');
+    const lowEstimate = this.page.locator('input[name="crowd_size_low"]');
+    const highEstimate = this.page.locator('input[name="crowd_size_high"]');
 
     if (await lowEstimate.count() > 0) {
       await lowEstimate.fill(low);
-      await bestEstimate.fill(best);
       await highEstimate.fill(high);
     }
   }
@@ -134,7 +133,17 @@ export class ProtestFormPage {
   }
 
   async isSubmitting() {
-    return await this.page.getByRole('button', { name: /submitting/i }).isVisible();
+    // Check if button text contains 'Submitting'
+    const buttonText = await this.submitButton.textContent();
+    return buttonText?.includes('Submitting') || false;
+  }
+
+  async waitForSubmission() {
+    // Wait for either navigation to success page or error display
+    await Promise.race([
+      this.page.waitForURL('**/success**', { timeout: 10000 }),
+      this.errorContainer.waitFor({ state: 'visible', timeout: 10000 })
+    ]).catch(() => {});
   }
 
   async hasErrors() {
