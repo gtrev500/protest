@@ -56,14 +56,6 @@
   // Initialize with first submission type selected
   let selectedSubmissionTypes = $state<string[]>([]);
   
-  $effect(() => {
-    if (submissionTypes.length > 0 && selectedSubmissionTypes.length === 0) {
-      const firstValidOption = submissionTypes.find(option => option.id !== 0);
-      if (firstValidOption) {
-        selectedSubmissionTypes = [firstValidOption.id.toString()];
-      }
-    }
-  });
 
   // Get errors from form action
   const errors = $derived(form?.errors || {});
@@ -111,55 +103,17 @@
     <BasicInfoSection {states} errors={errors} />
 
     <!-- Submission Type -->
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-2">
-        Submission Type
-      </label>
-      <div class="space-y-2 max-h-60 overflow-y-auto border rounded p-2">
-        {#each submissionTypes as option}
-          {#if option.id !== 0}
-            <label class="flex items-center">
-              <input
-                type="checkbox"
-                name="submission_types"
-                value={option.id}
-                checked={selectedSubmissionTypes.includes(option.id.toString())}
-                onchange={(e) => {
-                  const target = e.target as HTMLInputElement;
-                  if (target.checked) {
-                    selectedSubmissionTypes = [...selectedSubmissionTypes, option.id.toString()];
-                  } else {
-                    selectedSubmissionTypes = selectedSubmissionTypes.filter(id => id !== option.id.toString());
-                  }
-                }}
-                class="rounded border-gray-300 text-blue-600"
-              />
-              <span class="ml-2 text-sm">{option.name}</span>
-            </label>
-          {/if}
-        {/each}
-        <!-- Other option -->
-        <label class="flex items-start">
-          <input
-            type="checkbox"
-            name="submission_types"
-            value="0"
-            class="rounded border-gray-300 text-blue-600 mt-1"
-          />
-          <div class="ml-2 flex-1">
-            <span class="text-sm">Other:</span>
-            <input
-              type="text"
-              name="submission_types_other"
-              bind:value={submissionTypeOthers[0]}
-              class="mt-1 block w-full text-sm rounded-md border-gray-300"
-              placeholder="Specify other submission type"
-            />
-          </div>
-        </label>
-      </div>
-      <p class="mt-1 text-xs text-gray-500 italic">Check all that apply</p>
-    </div>
+     <CheckboxGroup
+      name="submission_types"
+      options={submissionTypes}
+      bind:values={selectedSubmissionTypes}
+      firstOptionIsChecked={true}
+      showOther={true}
+      otherValue={submissionTypeOthers[0]}
+      label="Submission Type"
+      supplementalInformation="Check all that apply"
+     />
+    
 
     <!-- Event Details -->
     <EventDetailsSection 
