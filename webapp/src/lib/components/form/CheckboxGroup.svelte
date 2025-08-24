@@ -11,7 +11,6 @@
     name: string;
     label: string;
     options: Option[];
-    values?: string[];
     otherValue?: string;
     showOther?: boolean;
     otherPlaceholder?: string;
@@ -24,7 +23,6 @@
     name,
     label,
     options,
-    values = $bindable([]),
     otherValue = $bindable(''),
     showOther = false,
     otherPlaceholder = 'Specify other',
@@ -32,8 +30,6 @@
     autoCapitalize = true,
     class: className = '',
   }: Props = $props();
-
-
 </script>
 
 <div class={className}>
@@ -46,7 +42,7 @@
         <label class="flex items-center">
           <input
             type="checkbox"
-            {name}
+            name={name}
             value={option.id}
             class="rounded border-gray-300 text-blue-600"
           />
@@ -55,11 +51,24 @@
       {/if}
     {/each}
     {#if showOther}
-      <OtherInput
-        checkboxName={name}
-        bind:otherText={otherValue}
-        placeholder={otherPlaceholder}
-      />
+      <label class="flex items-start">
+        <input
+          type="checkbox"
+          name={name}
+          value="0"
+          class="rounded border-gray-300 text-blue-600 mt-1"
+        />
+        <div class="ml-2 flex-1">
+          <span class="text-sm">Other:</span>
+          <input
+            type="text"
+            name={`${name}_other`}
+            bind:value={otherValue}
+            class="mt-1 block w-full text-sm rounded-md border-gray-300"
+            placeholder={otherPlaceholder}
+          />
+        </div>
+      </label>
     {/if}
   </div>
   {#if supplementalInformation}

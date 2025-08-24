@@ -1,17 +1,11 @@
 <!-- ProtestForm.svelte -->
 <script lang="ts">
-  import { createForm } from 'felte';
-  import { validator } from '@felte/validator-zod';
-  import { supabase } from '$lib/supabase';
-  import { goto } from '$app/navigation';
   import type { State, EventType, ParticipantType, ParticipantMeasure, PoliceMeasure, NotesOption, SubmissionType } from '$lib/types/database';
-  import { protestFormSchema, type ProtestFormSchema } from '$lib/types/schemas';
-  import { prepareSubmissionData } from '$lib/utils/formDataPreparation';
+  import type { FormActionResult } from '$lib/types/forms';
   
   // Form sections
   import TextArea from './form/TextArea.svelte';
   import TextField from './form/TextField.svelte';
-  // import SubmissionTypeSelector from './form/SubmissionTypeSelector.svelte';
   import CheckboxGroup from './form/CheckboxGroup.svelte';
   import BasicInfoSection from './form/BasicInfoSection.svelte';
   import EventDetailsSection from './form/EventDetailsSection.svelte';
@@ -30,6 +24,8 @@
     policeMeasures?: PoliceMeasure[];
     notesOptions?: NotesOption[];
     submissionTypes?: SubmissionType[];
+    form?: FormActionResult | null;
+    enhance?: any;
   }
 
   let {
@@ -39,146 +35,131 @@
     participantMeasures = [],
     policeMeasures = [],
     notesOptions = [],
-    submissionTypes = []
+    submissionTypes = [],
+    form = null,
+    enhance
   }: Props = $props();
 
-  // Track "other" values (use numeric key 0 instead of string "other")
+  // Track "other" values
   let eventTypeOthers: Record<number, string> = { 0: '' };
   let participantMeasureOthers: Record<number, string> = { 0: '' };
   let policeMeasureOthers: Record<number, string> = { 0: '' };
   let notesOthers: Record<number, string> = { 0: '' };
   let submissionTypeOthers: Record<number, string> = { 0: '' };
-  // Track whether to show validation errors
-  let showValidationErrors = $state(false);
   
   // Track online event state to conditionally show crowd size
   let isOnline = $state(false);
   
-  // Form handling
-  const { form, errors, isSubmitting, setFields } = createForm<ProtestFormSchema>({
-    initialValues: {
-      // Required fields
-      date_of_event: '',
-      locality: '',
-      state_code: '',
-      title: '',
-      
-      // Optional fields
-      location_name: '',
-      organization_name: '',
-      notable_participants: '',
-      targets: '',
-      claims_summary: '',
-      claims_verbatim: '',
-      macroevent: '',
-      is_online: false,
-      count_method: '',
-      crowd_size_low: null,
-      crowd_size_high: null,
-      sources: '',
-      
-      // Checkboxes
-      event_types: [],
-      participant_types: [],
-      participant_measures: [],
-      police_measures: [],
-      notes: [],
-      submission_types: [],
-      
-      // Incident fields with details
-      participant_injury: 'no',
-      participant_injury_details: '',
-      police_injury: 'no',
-      police_injury_details: '',
-      arrests: 'no',
-      arrests_details: '',
-      property_damage: 'no',
-      property_damage_details: '',
-      participant_casualties: 'no',
-      participant_casualties_details: '',
-      police_casualties: 'no',
-      police_casualties_details: ''
-    },
-    extend: validator({ schema: protestFormSchema }),
-    onSubmit: async (values) => {
-      try {
-        // Prepare data for submission using the utility function
-        const submissionData = prepareSubmissionData(values, {
-          submissionTypeOthers,
-          eventTypeOthers,
-          participantMeasureOthers,
-          policeMeasureOthers,
-          notesOthers
-        });
-
-        // Submit using the database function
-        const { data, error } = await supabase.rpc('submit_protest', submissionData);
-
-        if (error) {
-          console.error('Supabase RPC error:', error);
-          console.error('Error details:', error.message, error.details, error.hint);
-          throw error;
-        }
-
-        console.log('RPC response:', data);
-        
-        if (!data || !data.id) {
-          throw new Error('No ID returned from submission');
-        }
-
-        // Redirect to success page with public URL
-        goto(`/success?id=${data.id}`);
-      } catch (error) {
-        console.error('Error submitting protest:', error);
-      }
-    }
-  });
-
-  // Initialize submission_types with first option (new record) when data loads
+  // Track submission state
+  let isSubmitting = $state(false);
+  
+  // Initialize with first submission type selected
+  let selectedSubmissionTypes = $state<string[]>([]);
+  
   $effect(() => {
-    if (submissionTypes.length > 0) {
+    if (submissionTypes.length > 0 && selectedSubmissionTypes.length === 0) {
       const firstValidOption = submissionTypes.find(option => option.id !== 0);
       if (firstValidOption) {
-        setFields('submission_types', [firstValidOption.id.toString()]);
+        selectedSubmissionTypes = [firstValidOption.id.toString()];
       }
     }
   });
+
+  // Get errors from form action
+  const errors = $derived(form?.errors || {});
+  const errorMessage = $derived(form?.message || '');
+  const hasErrors = $derived(Object.keys(errors).length > 0 || errorMessage);
 </script>
 
 <div class="max-w-4xl mx-auto p-6">
   <h1 class="text-3xl font-bold mb-2">Protest Crowd Counts & Information</h1>
   <p class="text-gray-600 mb-8">Help us document protests accurately for the historical record.</p>
 
-  <!-- Show validation errors only after submit attempt -->
-  {#if showValidationErrors && $errors && Object.keys($errors).length > 0}
+  <!-- Show validation errors -->
+  {#if hasErrors}
     <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
-      <h3 class="text-sm font-medium text-red-800 mb-2">Please fix the following errors:</h3>
-      <ul class="list-disc list-inside text-sm text-red-700">
-        {#each Object.entries($errors) as [field, error]}
-          {#if error}
-            <li>{field}: {error}</li>
-          {/if}
-        {/each}
-      </ul>
+      {#if errorMessage}
+        <p class="text-sm font-medium text-red-800 mb-2">{errorMessage}</p>
+      {/if}
+      {#if Object.keys(errors).length > 0}
+        <h3 class="text-sm font-medium text-red-800 mb-2">Please fix the following errors:</h3>
+        <ul class="list-disc list-inside text-sm text-red-700">
+          {#each Object.entries(errors) as [field, fieldErrors]}
+            {#if fieldErrors}
+              {#each Array.isArray(fieldErrors) ? fieldErrors : [fieldErrors] as error}
+                <li>{field}: {error}</li>
+              {/each}
+            {/if}
+          {/each}
+        </ul>
+      {/if}
     </div>
   {/if}
 
-  <form use:form class="space-y-6">
+  <form 
+    method="POST" 
+    use:enhance={() => {
+      isSubmitting = true;
+      return async ({ result, update }) => {
+        isSubmitting = false;
+        await update();
+      };
+    }}
+    class="space-y-6"
+  >
     <!-- Basic Information -->
-    <BasicInfoSection {states} errors={$errors} />
+    <BasicInfoSection {states} errors={errors} />
 
     <!-- Submission Type -->
-    <!-- <SubmissionTypeSelector /> -->
-    <CheckboxGroup
-      name="submission_types"
-      label="Submission Type"
-      options={submissionTypes}
-      bind:otherValue={submissionTypeOthers[0]}
-      showOther
-      supplementalInformation="Check all that apply"
-      otherPlaceholder="Specify other submission type"
-      
-    />
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-2">
+        Submission Type
+      </label>
+      <div class="space-y-2 max-h-60 overflow-y-auto border rounded p-2">
+        {#each submissionTypes as option}
+          {#if option.id !== 0}
+            <label class="flex items-center">
+              <input
+                type="checkbox"
+                name="submission_types"
+                value={option.id}
+                checked={selectedSubmissionTypes.includes(option.id.toString())}
+                onchange={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  if (target.checked) {
+                    selectedSubmissionTypes = [...selectedSubmissionTypes, option.id.toString()];
+                  } else {
+                    selectedSubmissionTypes = selectedSubmissionTypes.filter(id => id !== option.id.toString());
+                  }
+                }}
+                class="rounded border-gray-300 text-blue-600"
+              />
+              <span class="ml-2 text-sm">{option.name}</span>
+            </label>
+          {/if}
+        {/each}
+        <!-- Other option -->
+        <label class="flex items-start">
+          <input
+            type="checkbox"
+            name="submission_types"
+            value="0"
+            class="rounded border-gray-300 text-blue-600 mt-1"
+          />
+          <div class="ml-2 flex-1">
+            <span class="text-sm">Other:</span>
+            <input
+              type="text"
+              name="submission_types_other"
+              bind:value={submissionTypeOthers[0]}
+              class="mt-1 block w-full text-sm rounded-md border-gray-300"
+              placeholder="Specify other submission type"
+            />
+          </div>
+        </label>
+      </div>
+      <p class="mt-1 text-xs text-gray-500 italic">Check all that apply</p>
+    </div>
 
     <!-- Event Details -->
     <EventDetailsSection 
@@ -205,18 +186,17 @@
 
     <!-- Crowd Size (only show for non-online events) -->
     {#if !isOnline}
-    
       <!-- Crowd Counting Method -->
       <TextField
         name="count_method"
         label="Crowd Counting Method"
         placeholder="e.g. sign-ins, counting through distributing flyers/handouts"
         required={!isOnline} 
-        error={$errors.count_method as string | null}
+        error={errors.count_method?.[0] || null}
       />
       <CrowdSizeSection />
-
     {/if}
+    
     <!-- Measures -->
     <MeasuresSection
       {participantMeasures}
@@ -233,12 +213,13 @@
       {notesOptions}
       bind:notesOther={notesOthers[0]}
     />
+    
     <TextArea
       name="sources"
       label="Source(s)"
       required
       placeholder="Include links to news articles, social media posts, etc."
-      error={$errors.sources as string | null}
+      error={errors.sources?.[0] || null}
       supplementalInformation="We discourage you from sharing any personal information like your name or email address. Information entered here will be publicly available."
     />
 
@@ -246,13 +227,10 @@
     <div class="pt-4">
       <button
         type="submit"
-        disabled={$isSubmitting}
-        on:click={() => {
-          showValidationErrors = true;
-        }}
+        disabled={isSubmitting}
         class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400"
       >
-        {$isSubmitting ? 'Submitting...' : 'Submit Protest Information'}
+        {isSubmitting ? 'Submitting...' : 'Submit Protest Information'}
       </button>
     </div>
   </form>
