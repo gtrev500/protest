@@ -15,7 +15,9 @@
 		"test:e2e": "playwright test",
 		"test:e2e:ui": "playwright test --ui",
 		"test:e2e:debug": "playwright test --debug",
-		"test:e2e:headed": "playwright test --headed"
+		"test:e2e:headed": "playwright test --headed",
+		"test:e2e:inspect": "playwright test tests/e2e/visual-inspection.spec.ts --headed --grep 'complete form submission with pauses'",
+		"test:e2e:step": "playwright test tests/e2e/visual-inspection.spec.ts --headed --grep 'manual form inspection'"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.2.5",
