@@ -4,14 +4,15 @@
   import { validator } from '@felte/validator-zod';
   import { supabase } from '$lib/supabase';
   import { goto } from '$app/navigation';
-  import type { State, EventType, ParticipantType, ParticipantMeasure, PoliceMeasure, NotesOption } from '$lib/types/database';
+  import type { State, EventType, ParticipantType, ParticipantMeasure, PoliceMeasure, NotesOption, SubmissionType } from '$lib/types/database';
   import { protestFormSchema, type ProtestFormSchema } from '$lib/types/schemas';
   import { prepareSubmissionData } from '$lib/utils/formDataPreparation';
   
   // Form sections
   import TextArea from './form/TextArea.svelte';
   import TextField from './form/TextField.svelte';
-  import SubmissionTypeSelector from './form/SubmissionTypeSelector.svelte';
+  // import SubmissionTypeSelector from './form/SubmissionTypeSelector.svelte';
+  import CheckboxGroup from './form/CheckboxGroup.svelte';
   import BasicInfoSection from './form/BasicInfoSection.svelte';
   import EventDetailsSection from './form/EventDetailsSection.svelte';
   import ClaimsSection from './form/ClaimsSection.svelte';
@@ -21,28 +22,40 @@
   import NotesSection from './form/NotesSection.svelte';
 
   // Lookup data is provided via props from the page's load() function (SSR)
-  export let states: State[] = [];
-  export let eventTypes: EventType[] = [];
-  export let participantTypes: ParticipantType[] = [];
-  export let participantMeasures: ParticipantMeasure[] = [];
-  export let policeMeasures: PoliceMeasure[] = [];
-  export let notesOptions: NotesOption[] = [];
+  interface Props {
+    states?: State[];
+    eventTypes?: EventType[];
+    participantTypes?: ParticipantType[];
+    participantMeasures?: ParticipantMeasure[];
+    policeMeasures?: PoliceMeasure[];
+    notesOptions?: NotesOption[];
+    submissionTypes?: SubmissionType[];
+  }
+
+  let {
+    states = [],
+    eventTypes = [],
+    participantTypes = [],
+    participantMeasures = [],
+    policeMeasures = [],
+    notesOptions = [],
+    submissionTypes = []
+  }: Props = $props();
 
   // Track "other" values (use numeric key 0 instead of string "other")
   let eventTypeOthers: Record<number, string> = { 0: '' };
   let participantMeasureOthers: Record<number, string> = { 0: '' };
   let policeMeasureOthers: Record<number, string> = { 0: '' };
   let notesOthers: Record<number, string> = { 0: '' };
-
+  let submissionTypeOthers: Record<number, string> = { 0: '' };
   // Track whether to show validation errors
-  let showValidationErrors = false;
+  let showValidationErrors = $state(false);
   
   // Track online event state to conditionally show crowd size
-  //let isOnline = $state(false);
-  let isOnline = false;
+  let isOnline = $state(false);
   
   // Form handling
-  const { form, errors, isSubmitting } = createForm<ProtestFormSchema>({
+  const { form, errors, isSubmitting, setFields } = createForm<ProtestFormSchema>({
     initialValues: {
       // Required fields
       date_of_event: '',
@@ -70,6 +83,7 @@
       participant_measures: [],
       police_measures: [],
       notes: [],
+      submission_types: [],
       
       // Incident fields with details
       participant_injury: 'no',
@@ -90,6 +104,7 @@
       try {
         // Prepare data for submission using the utility function
         const submissionData = prepareSubmissionData(values, {
+          submissionTypeOthers,
           eventTypeOthers,
           participantMeasureOthers,
           policeMeasureOthers,
@@ -118,6 +133,16 @@
       }
     }
   });
+
+  // Initialize submission_types with first option (new record) when data loads
+  $effect(() => {
+    if (submissionTypes.length > 0) {
+      const firstValidOption = submissionTypes.find(option => option.id !== 0);
+      if (firstValidOption) {
+        setFields('submission_types', [firstValidOption.id.toString()]);
+      }
+    }
+  });
 </script>
 
 <div class="max-w-4xl mx-auto p-6">
@@ -143,7 +168,17 @@
     <BasicInfoSection {states} errors={$errors} />
 
     <!-- Submission Type -->
-    <SubmissionTypeSelector />
+    <!-- <SubmissionTypeSelector /> -->
+    <CheckboxGroup
+      name="submission_types"
+      label="Submission Type"
+      options={submissionTypes}
+      bind:otherValue={submissionTypeOthers[0]}
+      showOther
+      supplementalInformation="Check all that apply"
+      otherPlaceholder="Specify other submission type"
+      
+    />
 
     <!-- Event Details -->
     <EventDetailsSection 

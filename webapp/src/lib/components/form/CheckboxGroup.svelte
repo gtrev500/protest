@@ -30,8 +30,10 @@
     otherPlaceholder = 'Specify other',
     supplementalInformation = '',
     autoCapitalize = true,
-    class: className = ''
+    class: className = '',
   }: Props = $props();
+
+
 </script>
 
 <div class={className}>
@@ -46,7 +48,6 @@
             type="checkbox"
             {name}
             value={option.id}
-            bind:group={values}
             class="rounded border-gray-300 text-blue-600"
           />
           <span class="ml-2 text-sm">{autoCapitalize ? capitalize(option.name) : option.name}</span>
