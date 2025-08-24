@@ -1,3 +1,16 @@
+-- Drop the old function first (with the old signature)
+DROP FUNCTION IF EXISTS submit_protest(jsonb, jsonb, jsonb, jsonb, jsonb, jsonb);
+
+-- Updated function to submit a complete protest with all related data including submission types
+CREATE OR REPLACE FUNCTION submit_protest(
+  protest_data jsonb,
+  submission_types_data jsonb DEFAULT '[]'::jsonb,
+  event_types_data jsonb DEFAULT '[]'::jsonb,
+  participant_types_data jsonb DEFAULT '[]'::jsonb,
+  participant_measures_data jsonb DEFAULT '[]'::jsonb,
+  police_measures_data jsonb DEFAULT '[]'::jsonb,
+  notes_data jsonb DEFAULT '[]'::jsonb
+) RETURNS jsonb AS $$
 DECLARE
   new_protest_id uuid;
   result jsonb;
@@ -62,6 +75,20 @@ BEGIN
     protest_data->>'sources',
     protest_data->>'count_method'
   ) RETURNING id INTO new_protest_id;
+
+  -- Insert submission types
+  IF jsonb_array_length(submission_types_data) > 0 THEN
+    INSERT INTO protest_submission_types (protest_id, submission_type_id, other_value)
+    SELECT 
+      new_protest_id,
+      CASE 
+        WHEN (item->>'id') IS NOT NULL THEN (item->>'id')::integer
+        ELSE NULL
+      END,
+      item->>'other'
+    FROM jsonb_array_elements(submission_types_data) AS item
+    WHERE (item->>'id') IS NOT NULL OR (item->>'other') IS NOT NULL;
+  END IF;
 
   -- Insert event types
   IF jsonb_array_length(event_types_data) > 0 THEN
@@ -138,3 +165,7 @@ BEGIN
   
   RETURN result;
 END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Grant execute permission to anon and authenticated roles
+GRANT EXECUTE ON FUNCTION submit_protest TO anon, authenticated;
