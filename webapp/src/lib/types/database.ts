@@ -11,6 +11,7 @@ export interface LookupOption {
 }
 
 // Specific type aliases for clarity
+export type SubmissionType = LookupOption;
 export type EventType = LookupOption;
 export type ParticipantType = LookupOption;
 export type ParticipantMeasure = LookupOption;

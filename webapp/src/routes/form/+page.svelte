@@ -4,7 +4,7 @@
   // Data injected by the server-side load() function
   export let data;
 
-  const { states, eventTypes, participantTypes, participantMeasures, policeMeasures, notesOptions } = data;
+  const { states, eventTypes, participantTypes, participantMeasures, policeMeasures, notesOptions, submissionTypes } = data;
 </script>
 
 <svelte:head>
@@ -18,4 +18,5 @@
   {participantMeasures}
   {policeMeasures}
   {notesOptions}
+  {submissionTypes}
 />

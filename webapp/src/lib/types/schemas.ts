@@ -24,6 +24,7 @@ export const protestFormSchema = z.object({
   crowd_size_high: z.number().int().min(0).optional().nullable(),
   count_method: z.string().optional(),
   // Multi-select arrays (ids are stringified numbers; 0 represents "Other")
+  submission_types: z.array(z.string()).default([]),
   event_types: z.array(z.string()).default([]),
   participant_types: z.array(z.string()).default([]),
   participant_measures: z.array(z.string()).default([]),
