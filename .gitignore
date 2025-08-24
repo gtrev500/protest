@@ -1,2 +1,4 @@
 .env
 supabase-project/supabase/
+test-results/
+playwright-report/
