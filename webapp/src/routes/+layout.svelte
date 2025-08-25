@@ -93,11 +93,22 @@
 	</main>
 
 	<!-- Footer -->
-	<footer class="bg-white mt-auto">
+	<footer class="bg-white mt-auto border-t border-gray-200">
 		<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-			<p class="text-center text-sm text-gray-500">
-				2025 Protest Tracker. A tool for documenting civic engagement.
-			</p>
+			<div class="text-center">
+				<p class="text-sm text-gray-500">
+					2025 Protest Sourcebook • Part of The We Count Project
+				</p>
+				<div class="flex justify-center items-center space-x-3 mt-2 text-xs">
+					<a href="https://wecountproject.com/" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-gray-600 underline">Home</a>
+					<span class="text-gray-300">•</span>
+					<a href="https://bit.ly/m/WeCount" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-gray-600 underline">Info</a>
+					<span class="text-gray-300">•</span>
+					<a href="https://trump-protests.fly.dev/" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-gray-600 underline">Dashboard</a>
+					<span class="text-gray-300">•</span>
+					<a href="https://submit.wecountproject.com/" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-gray-600 underline">Sourcebook</a>
+				</div>
+			</div>
 		</div>
 	</footer>
 </div>
