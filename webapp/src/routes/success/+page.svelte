@@ -15,7 +15,7 @@
 </script>
 
 <svelte:head>
-  <title>Success | Protest Tracker</title>
+  <title>Success | Protest Sourcebook</title>
 </svelte:head>
 
 <div class="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">

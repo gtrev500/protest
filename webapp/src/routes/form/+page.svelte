@@ -11,7 +11,7 @@
 </script>
 
 <svelte:head>
-  <title>Submit a Protest | Protest Tracker</title>
+  <title>Submit a Protest | Protest Sourcebook</title>
 </svelte:head>
 
 <ProtestForm

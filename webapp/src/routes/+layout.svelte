@@ -43,7 +43,7 @@
 			<div class="flex justify-between h-16">
 				<div class="flex">
 					<div class="flex-shrink-0 flex items-center">
-						<a href="/" class="text-xl font-bold text-gray-900">Protest Tracker</a>
+						<a href="/" class="text-xl font-bold text-gray-900">Protest Sourcebook</a>
 					</div>
 					<div class="hidden sm:ml-6 sm:flex sm:space-x-8">
 						{#each navLinks as link}
