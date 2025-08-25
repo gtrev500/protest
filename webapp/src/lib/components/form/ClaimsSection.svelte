@@ -12,4 +12,5 @@
 <TextArea
   name="claims_verbatim"
   label="Claims Verbatim (signs and chants)"
+  placeholder="e.g., Equality for All, Save Our Planet, Justice Now!"
 />
