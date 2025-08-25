@@ -37,7 +37,7 @@
     label="State/Territory"
     required
     options={stateOptions}
-    placeholder="Select a state"
+    placeholder="Select a state or territory"
     error={errors.state_code as string | null}
   />
 </div>
