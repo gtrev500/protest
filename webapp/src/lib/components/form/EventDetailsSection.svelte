@@ -45,6 +45,7 @@
 
 <TextField
   name="macroevent"
-  label="Macroevent (if part of a larger event)"
-  placeholder="e.g., Women's March, Trump Inauguration protests, etc."
+  label="Macroevent"
+  placeholder="e.g., protest with counter-protest, rally with counter-demonstration, etc."
+  supplementalInformation="See <a href='https://docs.google.com/document/d/1oaOf9s72FQnzQA8sbE8h0PwMIZLP6p0EDUV2ya065is/edit?tab=t.0#heading=h.8qik6d2y71b8' target='_blank' class='underline hover:no-underline'>here</a> for guidelines."
 />

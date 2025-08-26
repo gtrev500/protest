@@ -8,6 +8,7 @@
     placeholder?: string;
     type?: 'text' | 'email' | 'tel';
     class?: string;
+    supplementalInformation?: string;
   }
 
   let {
@@ -18,7 +19,8 @@
     required = false,
     placeholder = '',
     type = 'text',
-    class: className = ''
+    class: className = '',
+    supplementalInformation = ''
   }: Props = $props();
 </script>
 
@@ -38,5 +40,8 @@
   />
   {#if error}
     <p class="mt-1 text-sm text-red-600">{error}</p>
+  {/if}
+  {#if supplementalInformation}
+    <p class="mt-1 text-sm text-gray-500">{@html supplementalInformation}</p>
   {/if}
 </div>
