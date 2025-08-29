@@ -2,6 +2,7 @@
 <script lang="ts">
   import type { State, EventType, ParticipantType, ParticipantMeasure, PoliceMeasure, NotesOption, SubmissionType } from '$lib/types/database';
   import type { FormActionResult } from '$lib/types/forms';
+  import { Turnstile } from 'svelte-turnstile';
   
   // Form sections
   import TextArea from './form/TextArea.svelte';
@@ -56,6 +57,12 @@
   // Initialize with first submission type selected
   let selectedSubmissionTypes = $state<string[]>([]);
   
+  // Turnstile token
+  let turnstileToken = $state('');
+  let turnstileError = $state(false);
+  
+  // Get the site key with proper error handling
+  const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
   // Get errors from form action
   const errors = $derived(form?.errors || {});
@@ -176,6 +183,39 @@
       error={errors.sources?.[0] || null}
       supplementalInformation="We discourage you from sharing any personal information like your name or email address. Information entered here will be publicly available."
     />
+
+    <!-- Turnstile CAPTCHA -->
+    <div class="pt-4">
+      {#if siteKey}
+        <Turnstile
+          {siteKey}
+          on:turnstile-callback={(e) => {
+            turnstileToken = e.detail.token;
+            turnstileError = false;
+          }}
+          on:turnstile-error={(e) => {
+            console.error('Turnstile error:', e.detail);
+            turnstileError = true;
+            turnstileToken = '';
+          }}
+          on:turnstile-expired={() => {
+            turnstileToken = '';
+          }}
+          theme="light"
+          size="normal"
+        />
+        {#if turnstileError}
+          <p class="mt-2 text-sm text-red-600">Please complete the CAPTCHA verification</p>
+        {/if}
+      {:else}
+        <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+          <p class="text-sm text-yellow-800">CAPTCHA not configured. Please set VITE_TURNSTILE_SITE_KEY in your environment variables.</p>
+        </div>
+      {/if}
+    </div>
+    
+    <!-- Hidden field to pass token to server -->
+    <input type="hidden" name="turnstile_token" value={turnstileToken} />
 
     <!-- Submit Button -->
     <div class="pt-4">

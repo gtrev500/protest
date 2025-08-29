@@ -3,6 +3,7 @@ import { supabase } from '$lib/supabase';
 import { fail, redirect } from '@sveltejs/kit';
 import { protestFormSchema } from '$lib/types/schemas';
 import { prepareSubmissionData } from '$lib/utils/formDataPreparation';
+import { validateTurnstileToken } from '$lib/utils/turnstile';
 import type {
   State,
   EventType,
@@ -58,6 +59,25 @@ export const load: PageServerLoad = async ({ setHeaders }) => {
 export const actions: Actions = {
   default: async ({ request }) => {
     const formData = await request.formData();
+    
+    // Get Turnstile token from form
+    const turnstileToken = formData.get('turnstile_token')?.toString() || '';
+    
+    // Validate Turnstile token
+    if (!turnstileToken) {
+      return fail(400, {
+        message: 'Please complete the CAPTCHA verification',
+        values: {}
+      });
+    }
+    
+    const turnstileResult = await validateTurnstileToken(turnstileToken);
+    if (!turnstileResult.success) {
+      return fail(400, {
+        message: turnstileResult.error || 'CAPTCHA verification failed. Please try again.',
+        values: {}
+      });
+    }
     
     // Convert FormData to object
     const rawData: Record<string, any> = {};
