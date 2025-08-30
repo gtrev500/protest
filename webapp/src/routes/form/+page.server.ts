@@ -60,26 +60,7 @@ export const actions: Actions = {
   default: async ({ request }) => {
     const formData = await request.formData();
     
-    // Get Turnstile token from form
-    const turnstileToken = formData.get('turnstile_token')?.toString() || '';
-    
-    // Validate Turnstile token
-    if (!turnstileToken) {
-      return fail(400, {
-        message: 'Please complete the CAPTCHA verification',
-        values: {}
-      });
-    }
-    
-    const turnstileResult = await validateTurnstileToken(turnstileToken);
-    if (!turnstileResult.success) {
-      return fail(400, {
-        message: turnstileResult.error || 'CAPTCHA verification failed. Please try again.',
-        values: {}
-      });
-    }
-    
-    // Convert FormData to object
+    // Convert FormData to object FIRST (before CAPTCHA validation)
     const rawData: Record<string, any> = {};
     
     // Handle regular fields
@@ -109,23 +90,45 @@ export const actions: Actions = {
       }
     }
     
-    // Parse numeric fields
-    if (rawData.crowd_size_low) {
-      rawData.crowd_size_low = parseInt(rawData.crowd_size_low) || null;
-    }
-    if (rawData.crowd_size_high) {
-      rawData.crowd_size_high = parseInt(rawData.crowd_size_high) || null;
-    }
-    
-    // Handle boolean field
+    // Handle boolean field first
     rawData.is_online = rawData.is_online === 'true' || rawData.is_online === 'on';
     
-    // Validate with Zod
+    // Parse crowd size fields only if not an online event
+    if (!rawData.is_online) {
+      // Parse numeric fields - empty strings become null, valid numbers get parsed
+      rawData.crowd_size_low = rawData.crowd_size_low === '' ? null : parseInt(rawData.crowd_size_low) || null;
+      rawData.crowd_size_high = rawData.crowd_size_high === '' ? null : parseInt(rawData.crowd_size_high) || null;
+    } else {
+      // Clear crowd size fields for online events
+      rawData.crowd_size_low = null;
+      rawData.crowd_size_high = null;
+      rawData.count_method = '';
+    }
+    
+    // Validate form data with Zod FIRST
     const result = protestFormSchema.safeParse(rawData);
     
     if (!result.success) {
       return fail(400, {
         errors: result.error.flatten().fieldErrors,
+        values: rawData
+      });
+    }
+    
+    // NOW validate Turnstile token (after form validation passes)
+    const turnstileToken = formData.get('turnstile_token')?.toString() || '';
+    
+    if (!turnstileToken) {
+      return fail(400, {
+        message: 'Please complete the CAPTCHA verification',
+        values: rawData
+      });
+    }
+    
+    const turnstileResult = await validateTurnstileToken(turnstileToken);
+    if (!turnstileResult.success) {
+      return fail(400, {
+        message: turnstileResult.error || 'CAPTCHA verification failed. Please try again.',
         values: rawData
       });
     }

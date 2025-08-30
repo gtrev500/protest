@@ -60,6 +60,8 @@
   // Turnstile token
   let turnstileToken = $state('');
   let turnstileError = $state(false);
+  // Ref to the Turnstile container for scrolling on validation failure
+  let turnstileContainer: HTMLDivElement | null = null;
   
   // Get the site key with proper error handling
   const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
@@ -99,9 +101,17 @@
     method="POST" 
     use:enhance={() => {
       isSubmitting = true;
-      return async ({ result, update }) => {
+      return async ({ result, update }: { result: any; update: () => Promise<void> }) => {
         isSubmitting = false;
         await update();
+        // If the action failed due to CAPTCHA, show the inline error and scroll to the widget
+        const message: string | undefined = result?.data?.message;
+        if (result?.type === 'failure' && typeof message === 'string' && message.toLowerCase().includes('captcha')) {
+          turnstileError = true;
+          turnstileToken = '';
+          // Scroll the CAPTCHA into view for the user
+          turnstileContainer?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
       };
     }}
     class="space-y-6"
@@ -187,7 +197,7 @@
     />
 
     <!-- Turnstile CAPTCHA -->
-    <div class="pt-4">
+    <div class="pt-4" bind:this={turnstileContainer}>
       {#if siteKey}
         <Turnstile
           {siteKey}
