@@ -155,7 +155,9 @@
         required={!isOnline} 
         error={errors.count_method?.[0] || null}
       />
-      <CrowdSizeSection />
+      <CrowdSizeSection 
+      required={!isOnline}
+      />
     {/if}
     
     <!-- Measures -->

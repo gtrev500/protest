@@ -59,8 +59,22 @@ export const protestFormSchema = z.object({
       });
     }
     
-    // Additional in-person event validations can be added here
-    // For example, crowd size validations could be added if needed
+    // Crowd size estimates are required for in-person events
+    if (data.crowd_size_low === null || data.crowd_size_low === undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Lower crowd size estimate is required for in-person events',
+        path: ['crowd_size_low']
+      });
+    }
+    
+    if (data.crowd_size_high === null || data.crowd_size_high === undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Higher crowd size estimate is required for in-person events',
+        path: ['crowd_size_high']
+      });
+    }
   }
   
   // Future: Add other conditional validations here as needed
