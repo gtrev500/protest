@@ -128,7 +128,7 @@
       showOther={true}
       otherValue={submissionTypeOthers[0]}
       label="Submission Type"
-      supplementalInformation="Check all that apply"
+      supplementalInformation="Select all that apply. Use the other option for additional context or references."
      />
     
 
