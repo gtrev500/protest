@@ -86,7 +86,9 @@
 
   function formatDate(dateStr) {
     if (!dateStr) return '';
-    return new Date(dateStr).toLocaleDateString();
+    // Add 'T00:00:00' to ensure the date is parsed as local time, not UTC
+    // This prevents the date from shifting due to timezone differences
+    return new Date(dateStr + 'T00:00:00').toLocaleDateString();
   }
 
   // Reset page when filters change
