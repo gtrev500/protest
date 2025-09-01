@@ -3,6 +3,8 @@
   import { onMount } from 'svelte';
   import { supabase } from '$lib/supabase';
 
+  export let showMetrics = false;
+
   let protests = [];
   let stats = null;
   let loading = true;
@@ -101,8 +103,8 @@
 <div class="max-w-7xl mx-auto p-6">
   <h1 class="text-3xl font-bold mb-8">WeCountProject Form Submission Log</h1>
 
-  <!-- Statistics Cards
-  {#if stats}
+  <!-- Statistics Cards -->
+  {#if showMetrics && stats}
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
       <div class="bg-white rounded-lg shadow p-6">
         <h3 class="text-sm font-medium text-gray-500">Total Protests</h3>
@@ -124,7 +126,7 @@
         <p class="text-3xl font-bold text-purple-600">{formatNumber(stats.states_count)}</p>
       </div>
     </div>
-  {/if} -->
+  {/if}
 
   <!-- Filters -->
   <div class="bg-white rounded-lg shadow p-6 mb-6">
