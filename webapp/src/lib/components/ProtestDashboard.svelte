@@ -15,6 +15,8 @@
   let page = 1;
   let pageSize = 20;
   let totalCount = 0;
+  let sortField = 'date_of_event';
+  let sortOrder = 'desc';
 
   async function loadProtests() {
     loading = true;
@@ -44,7 +46,7 @@
       const to = from + pageSize - 1;
       
       const { data, error, count } = await query
-        .order('date_of_event', { ascending: false })
+        .order(sortField, { ascending: sortOrder === 'asc' })
         .range(from, to);
 
       if (error) throw error;
@@ -88,6 +90,10 @@
 
   function formatDate(dateStr) {
     if (!dateStr) return '';
+    // Check if it's already a timestamp with time (contains 'T')
+    if (dateStr.includes('T')) {
+      return new Date(dateStr).toLocaleDateString();
+    }
     // Add 'T00:00:00' to ensure the date is parsed as local time, not UTC
     // This prevents the date from shifting due to timezone differences
     return new Date(dateStr + 'T00:00:00').toLocaleDateString();
@@ -97,6 +103,31 @@
   function handleFilterChange() {
     page = 1;
     loadProtests();
+  }
+
+  // Handle sort change
+  function handleSortChange() {
+    page = 1;
+    loadProtests();
+  }
+
+  // Handle column header click for sorting
+  function handleColumnSort(field) {
+    if (sortField === field) {
+      // Toggle sort order if clicking same column
+      sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+    } else {
+      // Default to descending when switching columns
+      sortField = field;
+      sortOrder = 'desc';
+    }
+    handleSortChange();
+  }
+
+  // Get sort icon for column header
+  function getSortIcon(field) {
+    if (sortField !== field) return ''; // No icon when not sorted
+    return sortOrder === 'asc' ? '↑' : '↓';
   }
 </script>
 
@@ -209,7 +240,22 @@
           <thead class="bg-gray-50">
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Date
+                <button
+                  on:click={() => handleColumnSort('date_of_event')}
+                  class="flex items-center gap-1 hover:text-gray-700 transition-colors"
+                >
+                  Event Date
+                  <span class="text-gray-400">{getSortIcon('date_of_event')}</span>
+                </button>
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <button
+                  on:click={() => handleColumnSort('created_at')}
+                  class="flex items-center gap-1 hover:text-gray-700 transition-colors"
+                >
+                  Submitted
+                  <span class="text-gray-400">{getSortIcon('created_at')}</span>
+                </button>
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Title
@@ -233,6 +279,9 @@
               <tr class="hover:bg-gray-50">
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {formatDate(protest.date_of_event)}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {formatDate(protest.created_at)}
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-900">
                   <div class="font-medium">{protest.title}</div>
