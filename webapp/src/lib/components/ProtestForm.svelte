@@ -73,7 +73,7 @@
 </script>
 
 <div class="max-w-4xl mx-auto p-6">
-  <h1 class="text-3xl font-bold mb-2">Protest Crowd Counts & Information</h1>
+  <h1 class="text-3xl font-bold mb-2">Public Source Creator</h1>
   <p class="text-gray-600 mb-8">Help us document protests accurately for the historical record.</p>
 
   <!-- Show validation errors -->
