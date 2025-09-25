@@ -35,7 +35,7 @@
     class: className = '',
   }: Props = $props();
 
-  let otherChecked = $state(false);
+  let otherChecked = $state(values.includes('0'));
 </script>
 
 <div class={className}>
@@ -50,7 +50,18 @@
             type="checkbox"
             name={name}
             value={option.id}
-            checked={firstOptionIsChecked && index === 1}
+            checked={values.includes(option.id.toString()) || (firstOptionIsChecked && index === 1)}
+            onchange={(e) => {
+              const target = e.target as HTMLInputElement;
+              const value = target.value;
+              if (target.checked) {
+                if (!values.includes(value)) {
+                  values = [...values, value];
+                }
+              } else {
+                values = values.filter(v => v !== value);
+              }
+            }}
             class="rounded border-gray-300 text-blue-600"
           />
           <span class="ml-2 text-sm">{autoCapitalize ? capitalize(option.name) : option.name}</span>
@@ -63,12 +74,24 @@
           type="checkbox"
           name={name}
           value="0"
-          bind:checked={otherChecked}
+          checked={otherChecked || values.includes('0')}
+          onchange={(e) => {
+            const target = e.target as HTMLInputElement;
+            otherChecked = target.checked;
+            if (target.checked) {
+              if (!values.includes('0')) {
+                values = [...values, '0'];
+              }
+            } else {
+              values = values.filter(v => v !== '0');
+              otherValue = '';
+            }
+          }}
           class="rounded border-gray-300 text-blue-600 mt-1"
         />
         <div class="ml-2 flex-1">
           <span class="text-sm">Other:</span>
-          {#if otherChecked}
+          {#if otherChecked || values.includes('0')}
             <input
               type="text"
               name={`${name}_other`}

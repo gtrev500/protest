@@ -93,10 +93,10 @@
   });
 
   // Track "other" values
-  let eventTypeOthers: Record<number, string> = { 0: '' };
-  let participantMeasureOthers: Record<number, string> = { 0: '' };
-  let policeMeasureOthers: Record<number, string> = { 0: '' };
-  let notesOthers: Record<number, string> = { 0: '' };
+  let eventTypeOthers = $state<Record<number, string>>({ 0: '' });
+  let participantMeasureOthers = $state<Record<number, string>>({ 0: '' });
+  let policeMeasureOthers = $state<Record<number, string>>({ 0: '' });
+  let notesOthers = $state<Record<number, string>>({ 0: '' });
 
   // Track online event state to conditionally show crowd size
   let isOnline = $derived(formData.is_online);
@@ -252,10 +252,10 @@
     formData.participant_measures = [];
     formData.police_measures = [];
     formData.notes = [];
-    eventTypeOthers = { 0: '' };
-    participantMeasureOthers = { 0: '' };
-    policeMeasureOthers = { 0: '' };
-    notesOthers = { 0: '' };
+    eventTypeOthers[0] = '';
+    participantMeasureOthers[0] = '';
+    policeMeasureOthers[0] = '';
+    notesOthers[0] = '';
     referenceLoaded = false;
   }
 
