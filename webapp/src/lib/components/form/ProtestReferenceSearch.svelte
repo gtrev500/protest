@@ -19,7 +19,7 @@
   let {
     name,
     value = $bindable(),
-    required = false,
+    required = false, // Available for form validation even though not displayed
     error = null
   }: Props = $props();
 
@@ -141,10 +141,6 @@
 </script>
 
 <div class="space-y-2" bind:this={searchContainer}>
-  <label class="block text-sm font-medium text-gray-700">
-    Select the protest entry to reference {required ? '*' : ''}
-  </label>
-
   {#if !selectedProtest}
     <div class="relative">
       <input
@@ -186,23 +182,9 @@
                 {protest.title}
               </div>
               <div class="text-sm text-gray-600 mt-1">
-                <span class="inline-flex items-center">
-                  <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  {formatDate(protest.date_of_event)}
-                </span>
-                <span class="mx-1">•</span>
-                <span class="inline-flex items-center">
-                  <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  {protest.locality}, {protest.state_code}
-                </span>
+                {formatDate(protest.date_of_event)} • {protest.locality}, {protest.state_code}
                 {#if protest.organization_name}
-                  <span class="mx-1">•</span>
-                  <span>{protest.organization_name}</span>
+                  • {protest.organization_name}
                 {/if}
               </div>
               {#if protest.claims_summary}
@@ -236,38 +218,20 @@
       {/if}
     </div>
   {:else}
-    <div class="bg-blue-50 border border-blue-200 rounded-md p-4">
+    <div class="border rounded-md p-3 bg-gray-50">
       <div class="flex justify-between items-start">
         <div class="flex-1">
-          <div class="font-medium text-gray-900 flex items-center">
-            <svg class="w-4 h-4 text-blue-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-            </svg>
+          <div class="font-medium text-gray-900">
             {selectedProtest.title}
           </div>
-          <div class="text-sm text-gray-600 mt-1 ml-6">
-            <span class="inline-flex items-center">
-              <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              {formatDate(selectedProtest.date_of_event)}
-            </span>
-            <span class="mx-1">•</span>
-            <span class="inline-flex items-center">
-              <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              {selectedProtest.locality}, {selectedProtest.state_code}
-            </span>
+          <div class="text-sm text-gray-600 mt-1">
+            {formatDate(selectedProtest.date_of_event)} • {selectedProtest.locality}, {selectedProtest.state_code}
+            {#if selectedProtest.organization_name}
+              • {selectedProtest.organization_name}
+            {/if}
           </div>
-          {#if selectedProtest.organization_name}
-            <div class="text-sm text-gray-600 ml-6">
-              Organization: {selectedProtest.organization_name}
-            </div>
-          {/if}
           {#if selectedProtest.claims_summary}
-            <div class="text-xs text-gray-500 mt-2 ml-6">
+            <div class="text-xs text-gray-500 mt-2">
               {selectedProtest.claims_summary}
             </div>
           {/if}
@@ -275,9 +239,7 @@
         <button
           type="button"
           onclick={clearSelection}
-          class="ml-4 text-blue-600 hover:text-blue-800 text-sm font-medium
-                 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
-                 rounded px-2 py-1 transition-colors"
+          class="ml-4 text-blue-600 hover:text-blue-800 text-sm"
         >
           Change
         </button>
