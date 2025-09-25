@@ -17,50 +17,14 @@ export const GET: RequestHandler = async ({ url }) => {
   }
 
   try {
-    // Try using the RPC function first
-    const { data: rpcData, error: rpcError } = await supabase.rpc('search_protests_for_reference', {
+    const { data, error } = await supabase.rpc('search_protests_for_reference', {
       query_text: query,
       limit_count: Math.min(limit, 50),
       offset_count: offset
     });
 
-    let data = rpcData;
-    let error = rpcError;
-
-    // If RPC function doesn't exist, fall back to direct query
-    if (rpcError && (rpcError.code === '42883' || rpcError.message?.includes('function') || rpcError.message?.includes('does not exist'))) {
-      console.log('RPC function not found, using fallback search method');
-
-      // Fallback: Direct query using existing columns
-      const searchPattern = `%${query}%`;
-      const { data: fallbackData, error: fallbackError } = await supabase
-        .from('protests')
-        .select('id, title, date_of_event, locality, state_code, claims_summary, organization_name, created_at')
-        .or(`locality.ilike.${searchPattern},organization_name.ilike.${searchPattern},title.ilike.${searchPattern},claims_summary.ilike.${searchPattern}`)
-        .order('date_of_event', { ascending: false })
-        .limit(limit)
-        .range(offset, offset + limit - 1);
-
-      data = fallbackData;
-      error = fallbackError;
-
-      // Transform to match expected format
-      if (data) {
-        data = data.map((item: any) => ({
-          ...item,
-          submission_date: item.created_at,
-          rank: 1.0 // Default rank for fallback search
-        }));
-      }
-    }
-
     if (error) {
-      console.error('Search error:', {
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-        code: error.code
-      });
+      console.error('Search RPC error:', error);
       return json({ error: 'Search failed', details: error.message }, { status: 500 });
     }
 

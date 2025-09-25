@@ -19,9 +19,9 @@
   }: Props = $props();
 
   // Find IDs for special types by checking the name
-  // These should match your database:
-  // - "Data correction" or similar for corrections
-  // - "Updated or additional source for existing record" for updates
+  // These match the database:
+  // - ID 2: "data correction"
+  // - ID 3: "updated or additional source for existing record"
   const correctionType = $derived(
     submissionTypes.find(t =>
       t.name.toLowerCase().includes('correction') ||
