@@ -2,3 +2,5 @@
 supabase-project/supabase/
 test-results/
 playwright-report/
+
+.mcp.json

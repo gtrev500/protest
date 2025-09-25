@@ -54,8 +54,8 @@ export const protestFormSchema = z.object({
   sources: z.string().min(1, 'Source(s) are required')
 }).superRefine((data, ctx) => {
   // Validate reference requirement for corrections/updates
-  // IDs 2 and 3 are typically for corrections and updates
-  // Adjust these IDs based on your actual database values
+  // ID 2: "data correction"
+  // ID 3: "updated or additional source for existing record"
   const needsReference = ['2', '3'].includes(data.submission_type);
 
   if (needsReference && !data.referenced_protest_id) {
