@@ -3,11 +3,12 @@
   import type { State, EventType, ParticipantType, ParticipantMeasure, PoliceMeasure, NotesOption, SubmissionType } from '$lib/types/database';
   import type { FormActionResult } from '$lib/types/forms';
   import { Turnstile } from 'svelte-turnstile';
-  
+
   // Form sections
   import TextArea from './form/TextArea.svelte';
   import TextField from './form/TextField.svelte';
   import CheckboxGroup from './form/CheckboxGroup.svelte';
+  import SubmissionTypeRadioGroup from './form/SubmissionTypeRadioGroup.svelte';
   import BasicInfoSection from './form/BasicInfoSection.svelte';
   import EventDetailsSection from './form/EventDetailsSection.svelte';
   import ClaimsSection from './form/ClaimsSection.svelte';
@@ -46,16 +47,17 @@
   let participantMeasureOthers: Record<number, string> = { 0: '' };
   let policeMeasureOthers: Record<number, string> = { 0: '' };
   let notesOthers: Record<number, string> = { 0: '' };
-  let submissionTypeOthers: Record<number, string> = { 0: '' };
   
   // Track online event state to conditionally show crowd size
   let isOnline = $state(false);
   
   // Track submission state
   let isSubmitting = $state(false);
-  
-  // Initialize with first submission type selected
-  let selectedSubmissionTypes = $state<string[]>([]);
+
+  // Track single submission type and reference
+  let selectedSubmissionType = $state('');
+  let submissionTypeOther = $state('');
+  let referencedProtestId = $state('');
   
   // Turnstile token
   let turnstileToken = $state('');
@@ -120,16 +122,13 @@
     <BasicInfoSection {states} errors={errors} />
 
     <!-- Submission Type -->
-     <CheckboxGroup
-      name="submission_types"
-      options={submissionTypes}
-      bind:values={selectedSubmissionTypes}
-      firstOptionIsChecked={true}
-      showOther={true}
-      otherValue={submissionTypeOthers[0]}
-      label="Submission Type"
-      supplementalInformation="Select all that apply. Use the other option for additional context or references."
-     />
+    <SubmissionTypeRadioGroup
+      {submissionTypes}
+      bind:value={selectedSubmissionType}
+      bind:otherValue={submissionTypeOther}
+      bind:referencedProtestId={referencedProtestId}
+      errors={errors}
+    />
     
 
     <!-- Event Details -->

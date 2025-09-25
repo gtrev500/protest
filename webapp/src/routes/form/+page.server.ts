@@ -79,8 +79,13 @@ export const actions: Actions = {
       }
     }
     
-    // Convert checkbox arrays to arrays if they're single values
-    const checkboxFields = ['submission_types', 'event_types', 'participant_types', 
+    // Handle single submission type (now a single value, not array)
+    rawData.submission_type = rawData.submission_type?.toString() || '';
+    rawData.submission_type_other = rawData.submission_type_other?.toString() || '';
+    rawData.referenced_protest_id = rawData.referenced_protest_id?.toString() || null;
+
+    // Convert checkbox arrays to arrays if they're single values (excluding submission_type now)
+    const checkboxFields = ['event_types', 'participant_types',
                            'participant_measures', 'police_measures', 'notes'];
     for (const field of checkboxFields) {
       if (rawData[field] && !Array.isArray(rawData[field])) {
@@ -134,9 +139,18 @@ export const actions: Actions = {
     }
     
     try {
-      // Prepare submission data
-      const submissionData = prepareSubmissionData(result.data, {
-        submissionTypeOthers: { 0: rawData.submission_types_other || '' },
+      // Prepare submission data with single submission type
+      // Convert single submission type to array format for backward compatibility
+      const submissionTypesArray = result.data.submission_type ? [result.data.submission_type] : [];
+      const modifiedData = {
+        ...result.data,
+        submission_types: submissionTypesArray,
+        // Add referenced_protest_id to the protest data
+        referenced_protest_id: result.data.referenced_protest_id
+      };
+
+      const submissionData = prepareSubmissionData(modifiedData, {
+        submissionTypeOthers: { 0: result.data.submission_type_other || '' },
         eventTypeOthers: { 0: rawData.event_types_other || '' },
         participantMeasureOthers: { 0: rawData.participant_measures_other || '' },
         policeMeasureOthers: { 0: rawData.police_measures_other || '' },

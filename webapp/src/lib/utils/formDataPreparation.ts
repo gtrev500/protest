@@ -9,7 +9,7 @@ export interface OtherValues {
   notesOthers: Record<number, string>;
 }
 
-export function prepareProtestData(values: ProtestFormSchema): ProtestData {
+export function prepareProtestData(values: any): ProtestData {
   return {
     date_of_event: values.date_of_event,
     locality: values.locality,
@@ -38,7 +38,9 @@ export function prepareProtestData(values: ProtestFormSchema): ProtestData {
     participant_casualties_details: values.participant_casualties_details,
     police_casualties: values.police_casualties,
     police_casualties_details: values.police_casualties_details,
-    sources: values.sources
+    sources: values.sources,
+    // Add referenced_protest_id if present
+    ...(values.referenced_protest_id ? { referenced_protest_id: values.referenced_protest_id } : {})
   };
 }
 
@@ -60,7 +62,7 @@ export function prepareParticipantTypesData(ids: string[]): { id: number }[] {
 }
 
 export function prepareSubmissionData(
-  values: ProtestFormSchema,
+  values: any,
   otherValues: OtherValues
 ) {
   const protestData = prepareProtestData(values);

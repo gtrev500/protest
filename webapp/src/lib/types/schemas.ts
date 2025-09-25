@@ -23,8 +23,13 @@ export const protestFormSchema = z.object({
   crowd_size_low: z.number().int().min(0).optional().nullable(),
   crowd_size_high: z.number().int().min(0).optional().nullable(),
   count_method: z.string().optional(),
+
+  // Single submission type (changed from array)
+  submission_type: z.string().min(1, 'Please select a submission type'),
+  submission_type_other: z.string().optional(),
+  referenced_protest_id: z.string().uuid().optional().nullable(),
+
   // Multi-select arrays (ids are stringified numbers; 0 represents "Other")
-  submission_types: z.array(z.string()).default([]),
   event_types: z.array(z.string()).default([]),
   participant_types: z.array(z.string()).default([]),
   participant_measures: z.array(z.string()).default([]),
@@ -48,6 +53,28 @@ export const protestFormSchema = z.object({
   // Sources
   sources: z.string().min(1, 'Source(s) are required')
 }).superRefine((data, ctx) => {
+  // Validate reference requirement for corrections/updates
+  // IDs 2 and 3 are typically for corrections and updates
+  // Adjust these IDs based on your actual database values
+  const needsReference = ['2', '3'].includes(data.submission_type);
+
+  if (needsReference && !data.referenced_protest_id) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Please select the protest entry you are referencing',
+      path: ['referenced_protest_id']
+    });
+  }
+
+  // Validate "other" submission type
+  if (data.submission_type === '0' && !data.submission_type_other?.trim()) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Please specify the submission type',
+      path: ['submission_type_other']
+    });
+  }
+
   // Validation for in-person events
   if (!data.is_online) {
     // Count method is required for in-person events
