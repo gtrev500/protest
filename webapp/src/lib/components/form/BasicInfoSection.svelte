@@ -50,5 +50,5 @@
 
 <TextField
   name="location_name"
-  label="Location Name (specific place in city)"
+  label="Location Name or Address (specific place in city)"
 />
