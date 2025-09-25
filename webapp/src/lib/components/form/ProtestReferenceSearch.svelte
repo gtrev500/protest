@@ -38,6 +38,60 @@
     }
   });
 
+  // Extract UUID from various URL formats
+  function extractProtestId(input: string): string | null {
+    // Match patterns like:
+    // - https://domain.com/protest/494f00e2-8c7d-49c2-a466-688b86de0b1c
+    // - http://localhost:3000/protest/494f00e2-8c7d-49c2-a466-688b86de0b1c
+    // - /protest/494f00e2-8c7d-49c2-a466-688b86de0b1c
+    // - 494f00e2-8c7d-49c2-a466-688b86de0b1c (just the UUID)
+
+    const patterns = [
+      /\/protest\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i,
+      /^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i
+    ];
+
+    for (const pattern of patterns) {
+      const match = input.match(pattern);
+      if (match) {
+        return match[1];
+      }
+    }
+
+    return null;
+  }
+
+  async function fetchProtestById(id: string) {
+    isSearching = true;
+    try {
+      const response = await fetch(`/api/protests/${id}`);
+      const data = await response.json();
+
+      if (response.ok && data.protest) {
+        const protest = data.protest;
+        selectProtest({
+          id: protest.id,
+          title: protest.title || 'Untitled Event',
+          date_of_event: protest.date_of_event,
+          locality: protest.locality,
+          state_code: protest.state_code,
+          claims_summary: protest.claims_summary,
+          organization_name: protest.organization_name
+        });
+      } else {
+        console.error('Failed to fetch protest:', data.error);
+        // Still perform regular search with the input
+        await performSearch(searchQuery);
+      }
+    } catch (err) {
+      console.error('Error fetching protest by ID:', err);
+      // Fall back to regular search
+      await performSearch(searchQuery);
+    } finally {
+      isSearching = false;
+    }
+  }
+
   async function performSearch(query: string) {
     if (query.length < 3) {
       searchResults = [];
@@ -75,6 +129,14 @@
 
     // Clear any pending search
     clearTimeout(searchTimeout);
+
+    // Check if input looks like a URL or UUID
+    const protestId = extractProtestId(searchQuery);
+    if (protestId) {
+      // If we extracted a UUID, fetch it immediately
+      fetchProtestById(protestId);
+      return;
+    }
 
     // Show loading state immediately for better UX
     if (searchQuery.length >= 3) {
@@ -215,6 +277,8 @@
 
       {#if searchQuery.length > 0 && searchQuery.length < 3}
         <p class="text-xs text-gray-500 mt-1">Enter at least 3 characters to search</p>
+      {:else if !searchQuery}
+        <p class="text-xs text-gray-500 mt-1">Tip: You can paste a protest page URL directly</p>
       {/if}
     </div>
   {:else}
