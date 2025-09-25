@@ -5,9 +5,14 @@
   interface Props {
     notesOptions: NotesOption[];
     notesOther?: string;
+    selectedNotes?: string[];
   }
 
-  let { notesOptions, notesOther = $bindable('') }: Props = $props();
+  let {
+    notesOptions,
+    notesOther = $bindable(''),
+    selectedNotes = $bindable([])
+  }: Props = $props();
 </script>
 
 <CheckboxGroup
@@ -16,5 +21,6 @@
   options={notesOptions}
   showOther
   bind:otherValue={notesOther}
+  bind:values={selectedNotes}
   otherPlaceholder="Specify other note"
 />

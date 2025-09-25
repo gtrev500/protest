@@ -187,18 +187,26 @@
         formData.notes = protest.notes?.map((n: any) => n.note_id?.toString()).filter(Boolean) || [];
 
         // Handle "other" values from junction tables
-        protest.event_types?.forEach((e: any) => {
-          if (e.other_value) eventTypeOthers[0] = e.other_value;
-        });
-        protest.participant_measures?.forEach((m: any) => {
-          if (m.other_value) participantMeasureOthers[0] = m.other_value;
-        });
-        protest.police_measures?.forEach((m: any) => {
-          if (m.other_value) policeMeasureOthers[0] = m.other_value;
-        });
-        protest.notes?.forEach((n: any) => {
-          if (n.other_value) notesOthers[0] = n.other_value;
-        });
+        // Find the entry with ID 0 which contains the other value
+        const eventTypeOther = protest.event_types?.find((e: any) => e.event_type_id === 0);
+        if (eventTypeOther?.other_value) {
+          eventTypeOthers[0] = eventTypeOther.other_value.replace(/^"|"$/g, ''); // Remove quotes if present
+        }
+
+        const participantMeasureOther = protest.participant_measures?.find((m: any) => m.measure_id === 0);
+        if (participantMeasureOther?.other_value) {
+          participantMeasureOthers[0] = participantMeasureOther.other_value;
+        }
+
+        const policeMeasureOther = protest.police_measures?.find((m: any) => m.measure_id === 0);
+        if (policeMeasureOther?.other_value) {
+          policeMeasureOthers[0] = policeMeasureOther.other_value;
+        }
+
+        const noteOther = protest.notes?.find((n: any) => n.note_id === 0);
+        if (noteOther?.other_value) {
+          notesOthers[0] = noteOther.other_value;
+        }
 
         referenceLoaded = true;
       }
@@ -424,15 +432,31 @@
       {policeMeasures}
       bind:participantMeasureOther={participantMeasureOthers[0]}
       bind:policeMeasureOther={policeMeasureOthers[0]}
+      bind:selectedParticipantMeasures={formData.participant_measures}
+      bind:selectedPoliceMeasures={formData.police_measures}
     />
 
     <!-- Incidents -->
-    <IncidentSection />
+    <IncidentSection
+      bind:participantInjury={formData.participant_injury}
+      bind:participantInjuryDetails={formData.participant_injury_details}
+      bind:policeInjury={formData.police_injury}
+      bind:policeInjuryDetails={formData.police_injury_details}
+      bind:arrests={formData.arrests}
+      bind:arrestsDetails={formData.arrests_details}
+      bind:propertyDamage={formData.property_damage}
+      bind:propertyDamageDetails={formData.property_damage_details}
+      bind:participantCasualties={formData.participant_casualties}
+      bind:participantCasualtiesDetails={formData.participant_casualties_details}
+      bind:policeCasualties={formData.police_casualties}
+      bind:policeCasualtiesDetails={formData.police_casualties_details}
+    />
 
     <!-- Notes -->
     <NotesSection
       {notesOptions}
       bind:notesOther={notesOthers[0]}
+      bind:selectedNotes={formData.notes}
     />
     
     <TextArea

@@ -7,13 +7,17 @@
     policeMeasures: PoliceMeasure[];
     participantMeasureOther?: string;
     policeMeasureOther?: string;
+    selectedParticipantMeasures?: string[];
+    selectedPoliceMeasures?: string[];
   }
 
-  let { 
-    participantMeasures, 
+  let {
+    participantMeasures,
     policeMeasures,
     participantMeasureOther = $bindable(''),
-    policeMeasureOther = $bindable('')
+    policeMeasureOther = $bindable(''),
+    selectedParticipantMeasures = $bindable([]),
+    selectedPoliceMeasures = $bindable([])
   }: Props = $props();
 </script>
 
@@ -23,6 +27,7 @@
   options={participantMeasures}
   showOther
   bind:otherValue={participantMeasureOther}
+  bind:values={selectedParticipantMeasures}
   otherPlaceholder="Specify other measure"
 />
 
@@ -32,5 +37,6 @@
   options={policeMeasures}
   showOther
   bind:otherValue={policeMeasureOther}
+  bind:values={selectedPoliceMeasures}
   otherPlaceholder="Specify other measure"
 />
