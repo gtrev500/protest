@@ -1,7 +1,15 @@
-// Simple, declarative field mapping for form autofill
-// Uses existing types from schemas.ts to avoid duplication
+// Condensed form data mapping using central configuration
 
 import type { ProtestFormSchema } from '$lib/types/schemas';
+import {
+  INCIDENT_FIELDS,
+  TEXT_FIELDS,
+  MULTISELECT_WITH_OTHER,
+  MULTISELECT_WITHOUT_OTHER,
+  createDefaultFormData,
+  type FormDataType,
+  type OtherValuesType
+} from '$lib/config/formFieldsConfig';
 
 // Type for what we get back from the API when fetching a protest
 // This extends the form schema but has some differences in data types
@@ -55,176 +63,77 @@ export interface ProtestApiResponse {
 // Simple, declarative helper functions for form data manipulation
 
 /**
- * Populates form data from an API response
- * Handles all field mappings and transformations in a straightforward way
+ * Condensed populate function using configuration patterns
  */
 export function populateFormData(
   protest: ProtestApiResponse,
-  formData: any, // Using any here because Svelte's $state doesn't preserve types well
-  otherValues: any
+  formData: any,
+  otherValues: OtherValuesType
 ) {
-  // Copy simple text fields directly
+  // Handle all text fields in one go
+  TEXT_FIELDS.forEach(field => {
+    formData[field] = protest[field as keyof typeof protest] || '';
+  });
+
+  // Special fields
   formData.date_of_event = protest.date_of_event || '';
-  formData.locality = protest.locality || '';
-  formData.state_code = protest.state_code || '';
-  formData.location_name = protest.location_name || '';
-  formData.title = protest.title || '';
-  formData.organization_name = protest.organization_name || '';
-  formData.notable_participants = protest.notable_participants || '';
-  formData.targets = protest.targets || '';
-  formData.macroevent = protest.macroevent || '';
-  formData.claims_summary = protest.claims_summary || '';
-  formData.claims_verbatim = protest.claims_verbatim || '';
-  formData.sources = protest.sources || '';
-  formData.count_method = protest.count_method || '';
-
-  // Boolean field
   formData.is_online = protest.is_online || false;
-
-  // Convert numeric crowd sizes to strings for form inputs
   formData.crowd_size_low = protest.crowd_size_low?.toString() || '';
   formData.crowd_size_high = protest.crowd_size_high?.toString() || '';
 
-  // Incident fields with defaults
-  formData.participant_injury = protest.participant_injury || 'no';
-  formData.participant_injury_details = protest.participant_injury_details || '';
-  formData.police_injury = protest.police_injury || 'no';
-  formData.police_injury_details = protest.police_injury_details || '';
-  formData.arrests = protest.arrests || 'no';
-  formData.arrests_details = protest.arrests_details || '';
-  formData.property_damage = protest.property_damage || 'no';
-  formData.property_damage_details = protest.property_damage_details || '';
-  formData.participant_casualties = protest.participant_casualties || 'no';
-  formData.participant_casualties_details = protest.participant_casualties_details || '';
-  formData.police_casualties = protest.police_casualties || 'no';
-  formData.police_casualties_details = protest.police_casualties_details || '';
+  // Handle all incident fields using the pattern
+  INCIDENT_FIELDS.forEach(field => {
+    formData[field] = protest[field as keyof typeof protest] || 'no';
+    formData[`${field}_details`] = protest[`${field}_details` as keyof typeof protest] || '';
+  });
 
-  // Handle event types
-  if (protest.event_types) {
-    formData.event_types = protest.event_types
-      .map(e => e.event_type_id?.toString())
-      .filter(Boolean);
+  // Handle multiselects with "other" pattern
+  const multiSelectMap = {
+    event_types: { idField: 'event_type_id', otherField: 'eventTypeOthers' },
+    participant_measures: { idField: 'measure_id', otherField: 'participantMeasureOthers' },
+    police_measures: { idField: 'measure_id', otherField: 'policeMeasureOthers' },
+    notes: { idField: 'note_id', otherField: 'notesOthers' }
+  };
 
-    const eventTypeOther = protest.event_types.find(e => e.event_type_id === 0);
-    if (eventTypeOther?.other_value) {
-      otherValues.eventTypeOthers[0] = eventTypeOther.other_value.replace(/^"|"$/g, '');
+  Object.entries(multiSelectMap).forEach(([fieldName, config]) => {
+    const data = protest[fieldName as keyof typeof protest] as any[];
+    if (data) {
+      formData[fieldName] = data
+        .map(item => item[config.idField]?.toString())
+        .filter(Boolean);
+
+      const otherEntry = data.find(item => item[config.idField] === 0);
+      const otherKey = config.otherField as keyof OtherValuesType;
+      if (otherEntry?.other_value) {
+        otherValues[otherKey][0] = otherEntry.other_value.replace(/^"|"$/g, '');
+      } else {
+        otherValues[otherKey][0] = '';
+      }
     } else {
-      otherValues.eventTypeOthers[0] = '';
+      formData[fieldName] = [];
+      const otherKey = config.otherField as keyof OtherValuesType;
+      otherValues[otherKey][0] = '';
     }
-  } else {
-    formData.event_types = [];
-    otherValues.eventTypeOthers[0] = '';
-  }
+  });
 
-  // Handle participant types (no "other" field)
-  if (protest.participant_types) {
-    formData.participant_types = protest.participant_types
-      .map(p => p.participant_type_id?.toString())
-      .filter(Boolean);
-  } else {
-    formData.participant_types = [];
-  }
-
-  // Handle participant measures
-  if (protest.participant_measures) {
-    formData.participant_measures = protest.participant_measures
-      .map(m => m.measure_id?.toString())
-      .filter(Boolean);
-
-    const participantMeasureOther = protest.participant_measures.find(m => m.measure_id === 0);
-    if (participantMeasureOther?.other_value) {
-      otherValues.participantMeasureOthers[0] = participantMeasureOther.other_value;
-    } else {
-      otherValues.participantMeasureOthers[0] = '';
-    }
-  } else {
-    formData.participant_measures = [];
-    otherValues.participantMeasureOthers[0] = '';
-  }
-
-  // Handle police measures
-  if (protest.police_measures) {
-    formData.police_measures = protest.police_measures
-      .map(m => m.measure_id?.toString())
-      .filter(Boolean);
-
-    const policeMeasureOther = protest.police_measures.find(m => m.measure_id === 0);
-    if (policeMeasureOther?.other_value) {
-      otherValues.policeMeasureOthers[0] = policeMeasureOther.other_value;
-    } else {
-      otherValues.policeMeasureOthers[0] = '';
-    }
-  } else {
-    formData.police_measures = [];
-    otherValues.policeMeasureOthers[0] = '';
-  }
-
-  // Handle notes
-  if (protest.notes) {
-    formData.notes = protest.notes
-      .map(n => n.note_id?.toString())
-      .filter(Boolean);
-
-    const noteOther = protest.notes.find(n => n.note_id === 0);
-    if (noteOther?.other_value) {
-      otherValues.notesOthers[0] = noteOther.other_value;
-    } else {
-      otherValues.notesOthers[0] = '';
-    }
-  } else {
-    formData.notes = [];
-    otherValues.notesOthers[0] = '';
-  }
+  // Handle multiselects without "other"
+  MULTISELECT_WITHOUT_OTHER.forEach(field => {
+    const data = protest[field] as any[];
+    formData[field] = data
+      ? data.map(item => item[`${field.slice(0, -1)}_id`]?.toString()).filter(Boolean)
+      : [];
+  });
 }
 
 /**
- * Clears all form data to default/empty values
+ * Condensed clear function using configuration
  */
-export function clearFormData(formData: any, otherValues: any) {
-  // Clear text fields
-  formData.date_of_event = '';
-  formData.locality = '';
-  formData.state_code = '';
-  formData.location_name = '';
-  formData.title = '';
-  formData.organization_name = '';
-  formData.notable_participants = '';
-  formData.targets = '';
-  formData.macroevent = '';
-  formData.claims_summary = '';
-  formData.claims_verbatim = '';
-  formData.sources = '';
-  formData.count_method = '';
-  formData.crowd_size_low = '';
-  formData.crowd_size_high = '';
+export function clearFormData(formData: any, otherValues: OtherValuesType) {
+  // Use the default form data from configuration
+  Object.assign(formData, createDefaultFormData());
 
-  // Clear boolean
-  formData.is_online = false;
-
-  // Clear incident fields to 'no'
-  formData.participant_injury = 'no';
-  formData.participant_injury_details = '';
-  formData.police_injury = 'no';
-  formData.police_injury_details = '';
-  formData.arrests = 'no';
-  formData.arrests_details = '';
-  formData.property_damage = 'no';
-  formData.property_damage_details = '';
-  formData.participant_casualties = 'no';
-  formData.participant_casualties_details = '';
-  formData.police_casualties = 'no';
-  formData.police_casualties_details = '';
-
-  // Clear arrays
-  formData.event_types = [];
-  formData.participant_types = [];
-  formData.participant_measures = [];
-  formData.police_measures = [];
-  formData.notes = [];
-
-  // Clear "other" values
-  otherValues.eventTypeOthers[0] = '';
-  otherValues.participantMeasureOthers[0] = '';
-  otherValues.policeMeasureOthers[0] = '';
-  otherValues.notesOthers[0] = '';
+  // Clear all "other" values
+  Object.keys(otherValues).forEach(key => {
+    otherValues[key as keyof OtherValuesType][0] = '';
+  });
 }

@@ -4,6 +4,7 @@
   import type { FormActionResult } from '../../routes/form/+page.server';
   import { Turnstile } from 'svelte-turnstile';
   import { populateFormData, clearFormData as clearFormDataUtil } from '$lib/utils/formDataMapping';
+  import { createDefaultFormData, createDefaultOtherValues } from '$lib/config/formFieldsConfig';
 
   // Form sections
   import TextArea from './form/TextArea.svelte';
@@ -43,61 +44,14 @@
     enhance
   }: Props = $props();
 
-  // Comprehensive form data state
-  let formData = $state({
-    // Basic info
-    date_of_event: '',
-    locality: '',
-    state_code: '',
-    location_name: '',
-    title: '',
+  // Form data state using configuration
+  let formData = $state(createDefaultFormData());
 
-    // Event details
-    organization_name: '',
-    notable_participants: '',
-    targets: '',
-    macroevent: '',
+  // Track "other" values for multiselects
+  let otherValues = $state(createDefaultOtherValues());
 
-    // Claims
-    claims_summary: '',
-    claims_verbatim: '',
-
-    // Crowd info
-    is_online: false,
-    crowd_size_low: '',
-    crowd_size_high: '',
-    count_method: '',
-
-    // Incidents
-    participant_injury: 'no',
-    participant_injury_details: '',
-    police_injury: 'no',
-    police_injury_details: '',
-    arrests: 'no',
-    arrests_details: '',
-    property_damage: 'no',
-    property_damage_details: '',
-    participant_casualties: 'no',
-    participant_casualties_details: '',
-    police_casualties: 'no',
-    police_casualties_details: '',
-
-    // Sources
-    sources: '',
-
-    // Multi-select arrays
-    event_types: [] as string[],
-    participant_types: [] as string[],
-    participant_measures: [] as string[],
-    police_measures: [] as string[],
-    notes: [] as string[]
-  });
-
-  // Track "other" values
-  let eventTypeOthers = $state<Record<number, string>>({ 0: '' });
-  let participantMeasureOthers = $state<Record<number, string>>({ 0: '' });
-  let policeMeasureOthers = $state<Record<number, string>>({ 0: '' });
-  let notesOthers = $state<Record<number, string>>({ 0: '' });
+  // Destructure for backward compatibility with existing bindings
+  let { eventTypeOthers, participantMeasureOthers, policeMeasureOthers, notesOthers } = otherValues;
 
   // Track online event state to conditionally show crowd size
   let isOnline = $derived(formData.is_online);
@@ -138,17 +92,7 @@
       const data = await response.json();
 
       if (response.ok && data.protest) {
-        const protest = data.protest;
-
-        // Use the centralized mapping function
-        const otherValues = {
-          eventTypeOthers,
-          participantMeasureOthers,
-          policeMeasureOthers,
-          notesOthers
-        };
-
-        populateFormData(protest, formData, otherValues);
+        populateFormData(data.protest, formData, otherValues);
         referenceLoaded = true;
       }
     } catch (err) {
@@ -160,13 +104,6 @@
 
   // Clear form data
   function clearFormData() {
-    const otherValues = {
-      eventTypeOthers,
-      participantMeasureOthers,
-      policeMeasureOthers,
-      notesOthers
-    };
-
     clearFormDataUtil(formData, otherValues);
     referenceLoaded = false;
   }
