@@ -88,7 +88,6 @@ export const actions: Actions = {
     
     // Handle single submission type (now a single value, not array)
     rawData.submission_type = rawData.submission_type?.toString() || '';
-    rawData.submission_type_other = rawData.submission_type_other?.toString() || '';
     rawData.referenced_protest_id = rawData.referenced_protest_id?.toString() || null;
 
     // Convert checkbox arrays to arrays if they're single values (excluding submission_type now)
@@ -147,7 +146,7 @@ export const actions: Actions = {
     
     try {
       // Prepare submission data with single submission type
-      // Convert single submission type to array format for backward compatibility
+      // Convert single submission type to array format for junction table
       const submissionTypesArray = result.data.submission_type ? [result.data.submission_type] : [];
       const modifiedData = {
         ...result.data,
@@ -157,7 +156,6 @@ export const actions: Actions = {
       };
 
       const submissionData = prepareSubmissionData(modifiedData, {
-        submissionTypeOthers: { 0: result.data.submission_type_other || '' },
         eventTypeOthers: { 0: rawData.event_types_other || '' },
         participantMeasureOthers: { 0: rawData.participant_measures_other || '' },
         policeMeasureOthers: { 0: rawData.police_measures_other || '' },

@@ -26,7 +26,6 @@ export const protestFormSchema = z.object({
 
   // Single submission type (changed from array)
   submission_type: z.string().min(1, 'Please select a submission type'),
-  submission_type_other: z.string().optional(),
   referenced_protest_id: z.string().uuid().optional().nullable(),
 
   // Multi-select arrays (ids are stringified numbers; 0 represents "Other")
@@ -53,25 +52,15 @@ export const protestFormSchema = z.object({
   // Sources
   sources: z.string().min(1, 'Source(s) are required')
 }).superRefine((data, ctx) => {
-  // Validate reference requirement for corrections/updates
-  // ID 2: "data correction"
-  // ID 3: "updated or additional source for existing record"
-  const needsReference = ['2', '3'].includes(data.submission_type);
+  // Validate reference requirement for corrections
+  // ID 2: "data correction" (the only type requiring a reference now)
+  const needsReference = data.submission_type === '2';
 
   if (needsReference && !data.referenced_protest_id) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: 'Please select the protest entry you are referencing',
       path: ['referenced_protest_id']
-    });
-  }
-
-  // Validate "other" submission type
-  if (data.submission_type === '0' && !data.submission_type_other?.trim()) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: 'Please specify the submission type',
-      path: ['submission_type_other']
     });
   }
 

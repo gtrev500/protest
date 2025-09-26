@@ -2,7 +2,6 @@ import type { ProtestData, JunctionOption } from '$lib/types/database';
 import type { ProtestFormSchema } from '$lib/types/schemas';
 
 export interface OtherValues {
-  submissionTypeOthers: Record<number, string>;
   eventTypeOthers: Record<number, string>;
   participantMeasureOthers: Record<number, string>;
   policeMeasureOthers: Record<number, string>;
@@ -66,11 +65,11 @@ export function prepareSubmissionData(
   otherValues: OtherValues
 ) {
   const protestData = prepareProtestData(values);
-  
-  const submissionTypesData = prepareJunctionData(
-    values.submission_types,
-    otherValues.submissionTypeOthers
-  );
+
+  // Convert single submission_type to array for junction table
+  const submissionTypesData = values.submission_types
+    ? values.submission_types.map((id: string) => ({ id: parseInt(id) }))
+    : [];
 
   const eventTypesData = prepareJunctionData(
     values.event_types,

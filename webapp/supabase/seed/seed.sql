@@ -78,10 +78,8 @@ INSERT INTO states (code, name) VALUES
 
 -- Insert submission types (CRITICAL for the new feature)
 INSERT INTO submission_types (id, name) VALUES
-(0, 'Other'),
 (1, 'new record'),
-(2, 'data correction'),
-(3, 'updated or additional source for existing record');
+(2, 'data correction');
 
 -- Insert event types
 INSERT INTO event_types (id, name) VALUES
