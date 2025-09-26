@@ -7,6 +7,7 @@
     eventTypes: EventType[];
     participantTypes: ParticipantType[];
     eventTypeOther?: string;
+    participantTypeOther?: string;
     selectedEventTypes?: string[];
     selectedParticipantTypes?: string[];
     organizationName?: string;
@@ -18,6 +19,7 @@
     eventTypes,
     participantTypes,
     eventTypeOther = $bindable(''),
+    participantTypeOther = $bindable(''),
     selectedEventTypes = $bindable([]),
     selectedParticipantTypes = $bindable([]),
     organizationName = $bindable(''),
@@ -46,7 +48,10 @@
   name="participant_types"
   label="Participant Types"
   options={participantTypes}
+  showOther
+  bind:otherValue={participantTypeOther}
   bind:values={selectedParticipantTypes}
+  otherPlaceholder="Specify other participant type"
 />
 
 <TextField

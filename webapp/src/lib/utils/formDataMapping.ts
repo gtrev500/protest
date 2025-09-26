@@ -53,7 +53,7 @@ export interface ProtestApiResponse {
 
   // Junction tables with full data
   event_types?: Array<{ event_type_id: number; other_value?: string }>;
-  participant_types?: Array<{ participant_type_id: number }>;
+  participant_types?: Array<{ participant_type_id: number; other_value?: string }>;
   participant_measures?: Array<{ measure_id: number; other_value?: string }>;
   police_measures?: Array<{ measure_id: number; other_value?: string }>;
   notes?: Array<{ note_id: number; other_value?: string }>;
@@ -89,6 +89,7 @@ export function populateFormData(
   // Handle multiselects with "other" pattern
   const multiSelectMap = {
     event_types: { idField: 'event_type_id', otherField: 'eventTypeOthers' },
+    participant_types: { idField: 'participant_type_id', otherField: 'participantTypeOthers' },
     participant_measures: { idField: 'measure_id', otherField: 'participantMeasureOthers' },
     police_measures: { idField: 'measure_id', otherField: 'policeMeasureOthers' },
     notes: { idField: 'note_id', otherField: 'notesOthers' }
@@ -115,7 +116,7 @@ export function populateFormData(
     }
   });
 
-  // Handle multiselects without "other"
+  // Handle multiselects without "other" (if any)
   MULTISELECT_WITHOUT_OTHER.forEach(field => {
     const data = protest[field] as any[];
     formData[field] = data

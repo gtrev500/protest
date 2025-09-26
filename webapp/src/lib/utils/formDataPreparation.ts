@@ -3,6 +3,7 @@ import type { ProtestFormSchema } from '$lib/types/schemas';
 
 export interface OtherValues {
   eventTypeOthers: Record<number, string>;
+  participantTypeOthers: Record<number, string>;
   participantMeasureOthers: Record<number, string>;
   policeMeasureOthers: Record<number, string>;
   notesOthers: Record<number, string>;
@@ -55,10 +56,6 @@ export function prepareJunctionData(
   });
 }
 
-export function prepareParticipantTypesData(ids: string[]): { id: number }[] {
-  return ids.map(id => ({ id: parseInt(id) }));
-}
-
 export function prepareSubmissionData(
   values: any,
   otherValues: OtherValues
@@ -74,9 +71,10 @@ export function prepareSubmissionData(
     values.event_types,
     otherValues.eventTypeOthers
   );
-  
-  const participantTypesData = prepareParticipantTypesData(
-    values.participant_types
+
+  const participantTypesData = prepareJunctionData(
+    values.participant_types,
+    otherValues.participantTypeOthers
   );
   
   const participantMeasuresData = prepareJunctionData(

@@ -72,7 +72,7 @@ export const GET: RequestHandler = async ({ params }) => {
         .select('event_type_id, other_value')
         .eq('protest_id', id),
       supabase.from('protest_participant_types')
-        .select('participant_type_id')
+        .select('participant_type_id, other_value')
         .eq('protest_id', id),
       supabase.from('protest_participant_measures')
         .select('measure_id, other_value')

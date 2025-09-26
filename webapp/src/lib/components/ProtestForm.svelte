@@ -51,7 +51,7 @@
   let otherValues = $state(createDefaultOtherValues());
 
   // Destructure for backward compatibility with existing bindings
-  let { eventTypeOthers, participantMeasureOthers, policeMeasureOthers, notesOthers } = otherValues;
+  let { eventTypeOthers, participantTypeOthers, participantMeasureOthers, policeMeasureOthers, notesOthers } = otherValues;
 
   // Track online event state to conditionally show crowd size
   let isOnline = $derived(formData.is_online);
@@ -230,6 +230,7 @@
       {eventTypes}
       {participantTypes}
       bind:eventTypeOther={eventTypeOthers[0]}
+      bind:participantTypeOther={participantTypeOthers[0]}
       bind:selectedEventTypes={formData.event_types}
       bind:selectedParticipantTypes={formData.participant_types}
       bind:organizationName={formData.organization_name}

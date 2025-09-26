@@ -157,6 +157,7 @@ export const actions: Actions = {
 
       const submissionData = prepareSubmissionData(modifiedData, {
         eventTypeOthers: { 0: rawData.event_types_other || '' },
+        participantTypeOthers: { 0: rawData.participant_types_other || '' },
         participantMeasureOthers: { 0: rawData.participant_measures_other || '' },
         policeMeasureOthers: { 0: rawData.police_measures_other || '' },
         notesOthers: { 0: rawData.notes_other || '' }

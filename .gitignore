@@ -4,3 +4,5 @@ test-results/
 playwright-report/
 
 .mcp.json
+
+migrations_backup/

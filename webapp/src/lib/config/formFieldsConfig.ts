@@ -15,13 +15,13 @@ export const INCIDENT_FIELDS = [
 
 export const MULTISELECT_WITH_OTHER = [
   'event_types',
+  'participant_types',
   'participant_measures',
   'police_measures',
   'notes'
 ] as const;
 
 export const MULTISELECT_WITHOUT_OTHER = [
-  'participant_types'
 ] as const;
 
 // Simple text fields
@@ -83,6 +83,7 @@ export interface FormDataType extends
 // Other values type for multiselects with "other" option
 export type OtherValuesType = {
   eventTypeOthers: Record<number, string>;
+  participantTypeOthers: Record<number, string>;
   participantMeasureOthers: Record<number, string>;
   policeMeasureOthers: Record<number, string>;
   notesOthers: Record<number, string>;
@@ -121,6 +122,7 @@ export function createDefaultFormData(): FormDataType {
 export function createDefaultOtherValues(): OtherValuesType {
   return {
     eventTypeOthers: { 0: '' },
+    participantTypeOthers: { 0: '' },
     participantMeasureOthers: { 0: '' },
     policeMeasureOthers: { 0: '' },
     notesOthers: { 0: '' }
