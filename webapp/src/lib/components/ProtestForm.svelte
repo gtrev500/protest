@@ -309,9 +309,9 @@
     
     <TextArea
       name="sources"
-      label="Source(s)"
+      label="External Link(s)"
       required
-      placeholder="Include links to news articles, social media posts, etc."
+      placeholder="Include links about this event (e.g., pictures, videos, social media posts, news articles, blog posts)"
       bind:value={formData.sources}
       error={errors.sources?.[0] || null}
       supplementalInformation="We discourage you from sharing any personal information like your name or email address. Information entered here will be publicly available."
