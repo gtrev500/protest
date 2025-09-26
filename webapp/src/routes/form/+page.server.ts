@@ -14,6 +14,13 @@ import type {
   SubmissionType
 } from '$lib/types/database';
 
+// Type for form action results passed to the page
+export interface FormActionResult {
+  errors?: Record<string, string | string[]>;
+  message?: string;
+  values?: Record<string, any>;
+}
+
 export const load: PageServerLoad = async ({ setHeaders }) => {
   // Cache for 1 hour on CDN, 5 minutes in browser
   setHeaders({

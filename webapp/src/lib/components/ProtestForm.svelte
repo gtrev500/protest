@@ -1,8 +1,9 @@
 <!-- ProtestForm.svelte -->
 <script lang="ts">
   import type { State, EventType, ParticipantType, ParticipantMeasure, PoliceMeasure, NotesOption, SubmissionType } from '$lib/types/database';
-  import type { FormActionResult } from '$lib/types/forms';
+  import type { FormActionResult } from '../../routes/form/+page.server';
   import { Turnstile } from 'svelte-turnstile';
+  import { populateFormData, clearFormData as clearFormDataUtil } from '$lib/utils/formDataMapping';
 
   // Form sections
   import TextArea from './form/TextArea.svelte';
@@ -139,75 +140,15 @@
       if (response.ok && data.protest) {
         const protest = data.protest;
 
-        // Populate basic fields
-        formData.date_of_event = protest.date_of_event || '';
-        formData.locality = protest.locality || '';
-        formData.state_code = protest.state_code || '';
-        formData.location_name = protest.location_name || '';
-        formData.title = protest.title || '';
+        // Use the centralized mapping function
+        const otherValues = {
+          eventTypeOthers,
+          participantMeasureOthers,
+          policeMeasureOthers,
+          notesOthers
+        };
 
-        // Event details
-        formData.organization_name = protest.organization_name || '';
-        formData.notable_participants = protest.notable_participants || '';
-        formData.targets = protest.targets || '';
-        formData.macroevent = protest.macroevent || '';
-
-        // Claims
-        formData.claims_summary = protest.claims_summary || '';
-        formData.claims_verbatim = protest.claims_verbatim || '';
-
-        // Crowd info
-        formData.is_online = protest.is_online || false;
-        formData.crowd_size_low = protest.crowd_size_low?.toString() || '';
-        formData.crowd_size_high = protest.crowd_size_high?.toString() || '';
-        formData.count_method = protest.count_method || '';
-
-        // Incidents
-        formData.participant_injury = protest.participant_injury || 'no';
-        formData.participant_injury_details = protest.participant_injury_details || '';
-        formData.police_injury = protest.police_injury || 'no';
-        formData.police_injury_details = protest.police_injury_details || '';
-        formData.arrests = protest.arrests || 'no';
-        formData.arrests_details = protest.arrests_details || '';
-        formData.property_damage = protest.property_damage || 'no';
-        formData.property_damage_details = protest.property_damage_details || '';
-        formData.participant_casualties = protest.participant_casualties || 'no';
-        formData.participant_casualties_details = protest.participant_casualties_details || '';
-        formData.police_casualties = protest.police_casualties || 'no';
-        formData.police_casualties_details = protest.police_casualties_details || '';
-
-        // Sources
-        formData.sources = protest.sources || '';
-
-        // Handle junction table data (multi-selects)
-        formData.event_types = protest.event_types?.map((e: any) => e.event_type_id?.toString()).filter(Boolean) || [];
-        formData.participant_types = protest.participant_types?.map((p: any) => p.participant_type_id?.toString()).filter(Boolean) || [];
-        formData.participant_measures = protest.participant_measures?.map((m: any) => m.measure_id?.toString()).filter(Boolean) || [];
-        formData.police_measures = protest.police_measures?.map((m: any) => m.measure_id?.toString()).filter(Boolean) || [];
-        formData.notes = protest.notes?.map((n: any) => n.note_id?.toString()).filter(Boolean) || [];
-
-        // Handle "other" values from junction tables
-        // Find the entry with ID 0 which contains the other value
-        const eventTypeOther = protest.event_types?.find((e: any) => e.event_type_id === 0);
-        if (eventTypeOther?.other_value) {
-          eventTypeOthers[0] = eventTypeOther.other_value.replace(/^"|"$/g, ''); // Remove quotes if present
-        }
-
-        const participantMeasureOther = protest.participant_measures?.find((m: any) => m.measure_id === 0);
-        if (participantMeasureOther?.other_value) {
-          participantMeasureOthers[0] = participantMeasureOther.other_value;
-        }
-
-        const policeMeasureOther = protest.police_measures?.find((m: any) => m.measure_id === 0);
-        if (policeMeasureOther?.other_value) {
-          policeMeasureOthers[0] = policeMeasureOther.other_value;
-        }
-
-        const noteOther = protest.notes?.find((n: any) => n.note_id === 0);
-        if (noteOther?.other_value) {
-          notesOthers[0] = noteOther.other_value;
-        }
-
+        populateFormData(protest, formData, otherValues);
         referenceLoaded = true;
       }
     } catch (err) {
@@ -219,43 +160,14 @@
 
   // Clear form data
   function clearFormData() {
-    formData.date_of_event = '';
-    formData.locality = '';
-    formData.state_code = '';
-    formData.location_name = '';
-    formData.title = '';
-    formData.organization_name = '';
-    formData.notable_participants = '';
-    formData.targets = '';
-    formData.macroevent = '';
-    formData.claims_summary = '';
-    formData.claims_verbatim = '';
-    formData.is_online = false;
-    formData.crowd_size_low = '';
-    formData.crowd_size_high = '';
-    formData.count_method = '';
-    formData.participant_injury = 'no';
-    formData.participant_injury_details = '';
-    formData.police_injury = 'no';
-    formData.police_injury_details = '';
-    formData.arrests = 'no';
-    formData.arrests_details = '';
-    formData.property_damage = 'no';
-    formData.property_damage_details = '';
-    formData.participant_casualties = 'no';
-    formData.participant_casualties_details = '';
-    formData.police_casualties = 'no';
-    formData.police_casualties_details = '';
-    formData.sources = '';
-    formData.event_types = [];
-    formData.participant_types = [];
-    formData.participant_measures = [];
-    formData.police_measures = [];
-    formData.notes = [];
-    eventTypeOthers[0] = '';
-    participantMeasureOthers[0] = '';
-    policeMeasureOthers[0] = '';
-    notesOthers[0] = '';
+    const otherValues = {
+      eventTypeOthers,
+      participantMeasureOthers,
+      policeMeasureOthers,
+      notesOthers
+    };
+
+    clearFormDataUtil(formData, otherValues);
     referenceLoaded = false;
   }
 

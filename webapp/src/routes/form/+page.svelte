@@ -1,7 +1,7 @@
 <script lang="ts">
   import ProtestForm from '$lib/components/ProtestForm.svelte';
   import { enhance } from '$app/forms';
-  import type { FormActionResult } from '$lib/types/forms';
+  import type { FormActionResult } from './+page.server';
 
   // Data injected by the server-side load() function
   export let data;

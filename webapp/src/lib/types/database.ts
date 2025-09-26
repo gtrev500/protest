@@ -21,51 +21,8 @@ export type NotesOption = LookupOption;
 // Form types
 export type IncidentStatus = 'yes' | 'no';
 
-export interface FormValues {
-  // Basic info
-  date_of_event: string;
-  locality: string;
-  state_code: string;
-  location_name?: string;
-  title: string;
-  organization_name?: string;
-  notable_participants?: string;
-  targets?: string;
-  claims_summary?: string;
-  claims_verbatim?: string;
-  macroevent?: string;
-  is_online: boolean;
-  
-  // Crowd size
-  crowd_size_low?: string;
-  crowd_size_high?: string;
-  
-  // Multi-select arrays (0 represents "Other")
-  event_types: number[];
-  participant_types: number[];
-  participant_measures: number[];
-  police_measures: number[];
-  notes: number[];
-  
-  // Incident fields
-  participant_injury: IncidentStatus;
-  participant_injury_details?: string;
-  police_injury: IncidentStatus;
-  police_injury_details?: string;
-  arrests: IncidentStatus;
-  arrests_details?: string;
-  property_damage: IncidentStatus;
-  property_damage_details?: string;
-  participant_casualties: IncidentStatus;
-  participant_casualties_details?: string;
-  police_casualties: IncidentStatus;
-  police_casualties_details?: string;
-  
-  // Sources
-  sources?: string;
-}
-
 // Data structure for Supabase submission
+// This represents the protest data as stored in the database
 export interface ProtestData {
   date_of_event: string;
   locality: string;
