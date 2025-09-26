@@ -128,49 +128,6 @@ export function createDefaultOtherValues(): OtherValuesType {
   };
 }
 
-// Field metadata for UI generation (optional future use)
-export const FIELD_LABELS = {
-  // Basic info
-  date_of_event: 'Date of Event',
-  locality: 'City',
-  state_code: 'State',
-  location_name: 'Location Name',
-  title: 'Event Title',
-
-  // Event details
-  organization_name: 'Organization Name',
-  notable_participants: 'Notable Participants',
-  targets: 'Target(s) or Focal Point(s)',
-  macroevent: 'Macroevent',
-
-  // Claims
-  claims_summary: 'Claims Summary',
-  claims_verbatim: 'Claims Verbatim',
-
-  // Crowd
-  is_online: 'Online Event',
-  count_method: 'Crowd Counting Method',
-  crowd_size_low: 'Crowd Size (Low Estimate)',
-  crowd_size_high: 'Crowd Size (High Estimate)',
-
-  // Sources
-  sources: 'Sources',
-
-  // Incidents
-  participant_injury: 'Participant Injuries',
-  police_injury: 'Police Injuries',
-  arrests: 'Arrests',
-  property_damage: 'Property Damage',
-  participant_casualties: 'Participant Casualties',
-  police_casualties: 'Police Casualties',
-
-  // Multiselects
-  event_types: 'Event Types',
-  participant_types: 'Participant Types',
-  participant_measures: 'Participant Measures',
-  police_measures: 'Police Measures',
-  notes: 'Notes'
-} as const;
 
 // Required fields for validation
 export const REQUIRED_FIELDS = [
