@@ -24,7 +24,7 @@ export const GET: RequestHandler = async ({ url }) => {
     });
 
     if (error) {
-      console.error('Search RPC error:', error);
+      // Error details included in response
       return json({ error: 'Search failed', details: error.message }, { status: 500 });
     }
 

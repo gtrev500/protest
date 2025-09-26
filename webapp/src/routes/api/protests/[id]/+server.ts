@@ -56,7 +56,7 @@ export const GET: RequestHandler = async ({ params }) => {
       if (protestError.code === 'PGRST116') {
         return json({ error: 'Protest not found' }, { status: 404 });
       }
-      console.error('Error fetching protest:', protestError);
+      // Error already handled by returning 500 status
       return json({ error: 'Failed to fetch protest' }, { status: 500 });
     }
 
