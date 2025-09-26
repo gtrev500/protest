@@ -34,7 +34,6 @@ export interface ProtestData {
   targets?: string;
   claims_summary?: string;
   claims_verbatim?: string;
-  macroevent?: string;
   is_online: boolean;
   count_method?: string;
   crowd_size_low: number | null;

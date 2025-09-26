@@ -235,7 +235,6 @@
       bind:organizationName={formData.organization_name}
       bind:notableParticipants={formData.notable_participants}
       bind:targets={formData.targets}
-      bind:macroevent={formData.macroevent}
     />
 
     <!-- Claims -->

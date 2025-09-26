@@ -16,7 +16,6 @@ export const protestFormSchema = z.object({
   targets: z.string().optional(),
   claims_summary: z.string().optional(),
   claims_verbatim: z.string().optional(),
-  macroevent: z.string().optional(),
   is_online: z.boolean(),
   
   // Crowd size - using nullable to handle empty inputs, which Felte treats as undefined

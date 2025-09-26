@@ -20,7 +20,6 @@ export function prepareProtestData(values: any): ProtestData {
     targets: values.targets,
     claims_summary: values.claims_summary,
     claims_verbatim: values.claims_verbatim,
-    macroevent: values.macroevent,
     is_online: values.is_online,
     count_method: values.count_method,
     crowd_size_low: values.crowd_size_low || null,

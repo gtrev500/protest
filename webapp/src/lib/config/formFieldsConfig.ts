@@ -33,7 +33,6 @@ export const TEXT_FIELDS = [
   'organization_name',
   'notable_participants',
   'targets',
-  'macroevent',
   'claims_summary',
   'claims_verbatim',
   'count_method',

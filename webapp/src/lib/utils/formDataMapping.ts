@@ -27,7 +27,6 @@ export interface ProtestApiResponse {
   organization_name?: string;
   notable_participants?: string;
   targets?: string;
-  macroevent?: string;
   claims_summary?: string;
   claims_verbatim?: string;
   is_online?: boolean;
