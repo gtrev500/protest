@@ -40,7 +40,7 @@
 />
 <TextField
   name="organization_name"
-  label="Organization Name"
+  label="Organization(s) Name(s)"
   bind:value={organizationName}
 />
 
