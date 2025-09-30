@@ -122,7 +122,7 @@
 
 <div class="max-w-4xl mx-auto p-6">
   <h1 class="text-3xl font-bold mb-2">Public Source Creator</h1>
-  <p class="text-xs text-gray-500 italic mb-2">
+  <p class="text-base text-gray-900 font-semibold mb-4 p-3 bg-gray-50 border border-gray-300 rounded-md">
     We discourage sharing personal information. All entries will be publicly available.
   </p>
 
