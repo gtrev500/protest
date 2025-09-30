@@ -62,8 +62,8 @@
 
 <TextField
   name="targets"
-  label="Target(s) <span class='text-gray-500 italic text-xs'>(If related to Donald Trump, include &quot;Trump&quot;)</span>"
-  placeholder=""
-  supplementalInformation="Subjects of the protest (e.g., Trump, ICE, corporations, elected officials)."
+  label="Target(s)"
+  placeholder="Subjects of the protest (e.g., Trump, ICE, corporations, elected officials)."
+  supplementalInformation="If related to Donald Trump, include &quot;Trump&quot;."
   bind:value={targets}
 />
