@@ -122,7 +122,24 @@
 
 <div class="max-w-4xl mx-auto p-6">
   <h1 class="text-3xl font-bold mb-2">Public Source Creator</h1>
-  <p class="text-gray-600 mb-8">Help us document protests accurately for the historical record.</p>
+  <p class="text-xs text-gray-500 italic mb-2">
+    We discourage sharing personal information. All entries will be publicly available.
+  </p>
+
+  <!-- Instructions notice -->
+  <div class="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-md">
+    <p class="text-sm text-blue-800">
+      <span class="font-medium">For organizers:</span> Please review the
+      <a
+        href="https://docs.google.com/document/d/1Ik3yR2izOlFa9aHUq0lqKvNGwhaGC2qCcIEKJAAxYB8/edit?tab=t.0#heading=h.jxeic6xv6aab"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="underline hover:text-blue-900 font-medium"
+      >
+        submission instructions
+      </a> before filling out this form.
+    </p>
+  </div>
 
   <!-- Show reference loading indicator -->
   {#if isLoadingReference}
