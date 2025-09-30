@@ -27,3 +27,8 @@ vite.config.ts.timestamp-*
 .env.local
 
 dev.sh // tmux dev environment
+
+
+!backups/backup_production.sh
+backups/*/
+
