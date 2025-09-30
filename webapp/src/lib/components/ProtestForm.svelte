@@ -129,7 +129,7 @@
   <!-- Instructions notice -->
   <div class="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-md">
     <p class="text-sm text-blue-800">
-      <span class="font-medium">For organizers:</span> Please review the
+      Please review the
       <a
         href="https://docs.google.com/document/d/1Ik3yR2izOlFa9aHUq0lqKvNGwhaGC2qCcIEKJAAxYB8/edit?tab=t.0#heading=h.jxeic6xv6aab"
         target="_blank"
