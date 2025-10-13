@@ -9,7 +9,6 @@
 	}
 
 	const navLinks = [
-		{ href: '/', label: 'Home' },
 		{ href: '/form', label: 'Submit' },
 		{ href: '/log', label: 'Submission Log' }
 	];
