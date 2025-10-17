@@ -5,6 +5,7 @@
   import { Turnstile } from 'svelte-turnstile';
   import { populateFormData, clearFormData as clearFormDataUtil } from '$lib/utils/formDataMapping';
   import { createDefaultFormData, createDefaultOtherValues } from '$lib/config/formFieldsConfig';
+  import { trackEvent } from '$lib/utils/analytics';
 
   // Form sections
   import TextArea from './form/TextArea.svelte';
@@ -120,6 +121,11 @@
       clearFormData();
     }
   });
+
+  // Track form view on mount
+  $effect(() => {
+    trackEvent('form_viewed');
+  });
 </script>
 
 <div class="max-w-4xl mx-auto p-6">
@@ -204,20 +210,46 @@
     </div>
   {/if}
 
-  <form 
-    method="POST" 
+  <form
+    method="POST"
     use:enhance={() => {
       isSubmitting = true;
+      trackEvent('form_submit_attempted');
+
       return async ({ result, update }: { result: any; update: () => Promise<void> }) => {
         isSubmitting = false;
         await update();
-        // If the action failed due to CAPTCHA, show the inline error and scroll to the widget
-        const message: string | undefined = result?.data?.message;
-        if (result?.type === 'failure' && typeof message === 'string' && message.toLowerCase().includes('captcha')) {
-          turnstileError = true;
-          turnstileToken = '';
-          // Scroll the CAPTCHA into view for the user
-          turnstileContainer?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        // Track based on result type
+        if (result?.type === 'redirect') {
+          // Success - form redirected to success page
+          trackEvent('form_submit_success');
+        } else if (result?.type === 'failure') {
+          // Track validation errors
+          const errors = result?.data?.errors || {};
+          const errorFields = Object.keys(errors);
+
+          if (errorFields.length > 0) {
+            trackEvent('form_validation_failed', {
+              error_count: errorFields.length,
+              fields: errorFields
+            });
+          }
+
+          // If the action failed due to CAPTCHA, show the inline error and scroll to the widget
+          const message: string | undefined = result?.data?.message;
+          const isCaptchaIssue = typeof message === 'string' && message.toLowerCase().includes('captcha');
+
+          if (isCaptchaIssue) {
+            turnstileError = true;
+            turnstileToken = '';
+            // Scroll the CAPTCHA into view for the user
+            turnstileContainer?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+
+          trackEvent('form_submit_failed', {
+            reason: isCaptchaIssue ? 'captcha' : 'server'
+          });
         }
       };
     }}
@@ -349,14 +381,21 @@
           on:turnstile-callback={(e) => {
             turnstileToken = e.detail.token;
             turnstileError = false;
+            trackEvent('captcha_completed', {
+              token_received: !!e.detail.token
+            });
           }}
           on:turnstile-error={(e) => {
             console.error('Turnstile error:', e.detail);
             turnstileError = true;
             turnstileToken = '';
+            trackEvent('captcha_error', {
+              error_type: e.detail?.code || 'unknown'
+            });
           }}
           on:turnstile-expired={() => {
             turnstileToken = '';
+            trackEvent('captcha_expired');
           }}
           theme="light"
           size="normal"

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import '../app.css';
+	import { markUmamiReady } from '$lib/utils/analytics';
 
 	let { children } = $props();
 	let isOpen = $state(false);
@@ -12,7 +13,26 @@
 		{ href: '/form', label: 'Submit' },
 		{ href: '/log', label: 'Submission Log' }
 	];
+
+	// Umami analytics configuration
+	const umamiScriptUrl = import.meta.env.VITE_UMAMI_SCRIPT_URL;
+	const umamiWebsiteId = import.meta.env.VITE_UMAMI_WEBSITE_ID;
+
+	function handleUmamiLoad() {
+		markUmamiReady();
+	}
 </script>
+
+<svelte:head>
+	{#if umamiScriptUrl && umamiWebsiteId}
+		<script
+			defer
+			src={umamiScriptUrl}
+			data-website-id={umamiWebsiteId}
+			onload={handleUmamiLoad}
+		></script>
+	{/if}
+</svelte:head>
 
 <!-- Desktop Navigation -->
 {#snippet desktopNavLink(link: typeof navLinks[0])}
