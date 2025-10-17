@@ -41,11 +41,25 @@
 
   let otherChecked = $state(values.includes('0'));
   let containerElement: HTMLDivElement;
+  let otherInputElement = $state<HTMLInputElement>();
 
   // Scroll to this field when there's an error
   $effect(() => {
     if (error && containerElement) {
       containerElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+
+  // Focus and scroll to the Other text input when it becomes visible
+  $effect(() => {
+    if (otherChecked && otherInputElement) {
+      // Use 'nearest' to only scroll within the container, not the entire page
+      otherInputElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'nearest'
+      });
+      otherInputElement.focus();
     }
   });
 </script>
@@ -112,6 +126,7 @@
               type="text"
               name={`${name}_other`}
               bind:value={otherValue}
+              bind:this={otherInputElement}
               class="mt-1 block w-full text-sm rounded-md border-gray-300"
               placeholder={otherPlaceholder}
             />
