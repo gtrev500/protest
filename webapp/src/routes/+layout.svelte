@@ -107,6 +107,9 @@
 					<span class="text-gray-300">•</span>
 					<a href="https://submit.wecountproject.com/" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-gray-600 underline">Sourcebook</a>
 				</div>
+				<p class="text-xs text-gray-400 mt-2">
+					<a href="mailto:contact@wecountproject.com" class="hover:text-gray-600">contact@wecountproject.com</a>
+				</p>
 			</div>
 		</div>
 	</footer>
