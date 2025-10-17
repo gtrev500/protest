@@ -19,6 +19,8 @@
     firstOptionIsChecked?: boolean;
     values?: string[];
     class?: string;
+    required?: boolean;
+    error?: string | null;
   }
 
   let {
@@ -33,16 +35,30 @@
     firstOptionIsChecked = false,
     values = $bindable([]),
     class: className = '',
+    required = false,
+    error = null,
   }: Props = $props();
 
   let otherChecked = $state(values.includes('0'));
+  let containerElement: HTMLDivElement;
+
+  // Scroll to this field when there's an error
+  $effect(() => {
+    if (error && containerElement) {
+      containerElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
 </script>
 
-<div class={className}>
-  <label class="block text-sm font-medium text-gray-700 mb-2">
-    {label}
-  </label>
-  <div class="space-y-2 max-h-60 overflow-y-auto border rounded p-2">
+<div class={className} bind:this={containerElement}>
+  <fieldset>
+    <legend class="block text-sm font-medium text-gray-700 mb-2">
+      {label}
+      {#if required}
+        <span class="">*</span>
+      {/if}
+    </legend>
+    <div class="space-y-2 max-h-60 overflow-y-auto border rounded p-2 {error ? 'border-black' : 'border-gray-300'}">
     {#each options as option, index}
       {#if option.id !== 0}
         <label class="flex items-center">
@@ -103,10 +119,16 @@
         </div>
       </label>
     {/if}
-  </div>
+    </div>
+  </fieldset>
   {#if supplementalInformation}
     <p class="mt-1 text-xs text-gray-500 italic">
       {supplementalInformation}
+    </p>
+  {/if}
+  {#if error}
+    <p class="mt-1 text-sm text-red-600">
+      {error}
     </p>
   {/if}
 </div>

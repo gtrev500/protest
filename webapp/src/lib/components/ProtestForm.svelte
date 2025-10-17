@@ -287,6 +287,7 @@
         bind:otherValue={countMethodOthers[0]}
         bind:values={formData.count_methods}
         otherPlaceholder="Specify other counting method"
+        required
         error={errors.count_methods?.[0] || null}
         supplementalInformation="Select all methods used to estimate crowd size"
       />
