@@ -78,6 +78,46 @@ export function trackEvent(event: string, data?: Record<string, any>): void {
 }
 
 /**
+ * Track an analytics event that must be sent even during page unload.
+ * Uses navigator.sendBeacon() for reliability when the page is closing.
+ * Ideal for tracking form abandonment, session end, etc.
+ *
+ * @param event - The event name (e.g., 'form_abandoned')
+ * @param data - Optional event properties (no PII)
+ */
+export function trackEventBeacon(event: string, data?: Record<string, any>): void {
+  if (!isBrowser || !umamiEnabled) {
+    return;
+  }
+
+  let beaconSent = false;
+
+  if (navigator.sendBeacon) {
+    const payload = JSON.stringify({
+      type: 'event',
+      payload: {
+        website: import.meta.env.VITE_UMAMI_WEBSITE_ID,
+        hostname: window.location.hostname,
+        language: navigator.language,
+        screen: `${window.screen.width}x${window.screen.height}`,
+        title: document.title,
+        url: window.location.pathname,
+        name: event,
+        data: data || {}
+      }
+    });
+
+    const scriptUrl = import.meta.env.VITE_UMAMI_SCRIPT_URL;
+    const baseUrl = scriptUrl.replace('/script.js', '');
+    beaconSent = navigator.sendBeacon(`${baseUrl}/api/send`, payload);
+  }
+
+  if (!beaconSent && window.umami?.track) {
+    window.umami.track(event, data);
+  }
+}
+
+/**
  * Called when Umami script loads to flush queued events.
  * @internal
  */

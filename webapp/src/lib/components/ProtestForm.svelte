@@ -5,7 +5,7 @@
   import { Turnstile } from 'svelte-turnstile';
   import { populateFormData, clearFormData as clearFormDataUtil } from '$lib/utils/formDataMapping';
   import { createDefaultFormData, createDefaultOtherValues } from '$lib/config/formFieldsConfig';
-  import { trackEvent } from '$lib/utils/analytics';
+  import { trackEvent, trackEventBeacon } from '$lib/utils/analytics';
 
   // Form sections
   import TextArea from './form/TextArea.svelte';
@@ -63,6 +63,14 @@
   let isSubmitting = $state(false);
   let isLoadingReference = $state(false);
   let referenceLoaded = $state(false);
+
+  // Track form abandonment
+  let formStartTime = $state(0);
+  let hasInteracted = $state(false);
+  let formSubmittedSuccessfully = $state(false);
+
+  // Plain variable for synchronous check during page unload
+  let hasTrackedAbandonment = false;
 
   // Track single submission type and reference
   let selectedSubmissionType = $state('');
@@ -125,6 +133,65 @@
   // Track form view on mount
   $effect(() => {
     trackEvent('form_viewed');
+    formStartTime = Date.now();
+  });
+
+  // Track first user interaction
+  $effect(() => {
+    const handleInteraction = () => {
+      if (!hasInteracted) {
+        hasInteracted = true;
+        trackEvent('form_interaction_started');
+      }
+    };
+
+    // Listen for any form input
+    document.addEventListener('input', handleInteraction, { once: true });
+    document.addEventListener('change', handleInteraction, { once: true });
+
+    return () => {
+      document.removeEventListener('input', handleInteraction);
+      document.removeEventListener('change', handleInteraction);
+    };
+  });
+
+  // Track form abandonment on page unload
+  $effect(() => {
+    const handleUnload = () => {
+      // Guard: return immediately if we've already tracked abandonment
+      if (hasTrackedAbandonment) return;
+
+      // Only track abandonment if user interacted but didn't submit
+      if (!hasInteracted || formSubmittedSuccessfully || isSubmitting) return;
+
+      // Set flag IMMEDIATELY to block duplicate calls
+      hasTrackedAbandonment = true;
+
+      // Now safe to do the tracking work
+      const timeSpentSeconds = Math.floor((Date.now() - formStartTime) / 1000);
+
+      // Check which sections have data to gauge completion
+      const hasBasicInfo = !!(formData.date_of_event || formData.locality || formData.state_code);
+      const hasEventDetails = !!(formData.event_types?.length || formData.participant_types?.length);
+      const hasCrowdSize = !!(formData.crowd_size_low || formData.crowd_size_high);
+
+      trackEventBeacon('form_abandoned', {
+        time_spent_seconds: timeSpentSeconds,
+        has_basic_info: hasBasicInfo,
+        has_event_details: hasEventDetails,
+        has_crowd_size: hasCrowdSize
+      });
+    };
+
+    // Use both events for maximum browser coverage
+    // Whichever fires first will track, second will be blocked by flag
+    window.addEventListener('beforeunload', handleUnload);
+    window.addEventListener('pagehide', handleUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleUnload);
+      window.removeEventListener('pagehide', handleUnload);
+    };
   });
 </script>
 
@@ -223,6 +290,7 @@
         // Track based on result type
         if (result?.type === 'redirect') {
           // Success - form redirected to success page
+          formSubmittedSuccessfully = true;
           trackEvent('form_submit_success');
         } else if (result?.type === 'failure') {
           // Track validation errors
