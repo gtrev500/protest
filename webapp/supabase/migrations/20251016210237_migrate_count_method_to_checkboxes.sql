@@ -19,7 +19,7 @@ INSERT INTO count_methods (id, name) VALUES
   (0, 'Other'),
   (1, 'Sign-ins'),
   (2, 'Visual estimate/count'),
-  (3, 'Distributed flyers/handouts'),
+  (3, 'Distributed flyers/handouts')
 ON CONFLICT (id) DO NOTHING;
 
 COMMENT ON TABLE "public"."count_methods" IS
