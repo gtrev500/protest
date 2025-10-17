@@ -31,7 +31,6 @@ export const GET: RequestHandler = async ({ params }) => {
         is_online,
         crowd_size_low,
         crowd_size_high,
-        count_method,
         participant_injury,
         participant_injury_details,
         police_injury,
@@ -66,7 +65,8 @@ export const GET: RequestHandler = async ({ params }) => {
       participantTypesRes,
       participantMeasuresRes,
       policeMeasuresRes,
-      notesRes
+      notesRes,
+      countMethodsRes
     ] = await Promise.all([
       supabase.from('protest_event_types')
         .select('event_type_id, other_value')
@@ -82,6 +82,9 @@ export const GET: RequestHandler = async ({ params }) => {
         .eq('protest_id', id),
       supabase.from('protest_notes')
         .select('note_id, other_value')
+        .eq('protest_id', id),
+      supabase.from('protest_count_methods')
+        .select('count_method_id, other_value')
         .eq('protest_id', id)
     ]);
 
@@ -92,7 +95,8 @@ export const GET: RequestHandler = async ({ params }) => {
       participant_types: participantTypesRes.data || [],
       participant_measures: participantMeasuresRes.data || [],
       police_measures: policeMeasuresRes.data || [],
-      notes: notesRes.data || []
+      notes: notesRes.data || [],
+      count_methods: countMethodsRes.data || []
     };
 
     return json({ protest: completeData });

@@ -18,7 +18,8 @@ export const MULTISELECT_WITH_OTHER = [
   'participant_types',
   'participant_measures',
   'police_measures',
-  'notes'
+  'notes',
+  'count_methods'
 ] as const;
 
 export const MULTISELECT_WITHOUT_OTHER = [
@@ -35,7 +36,6 @@ export const TEXT_FIELDS = [
   'targets',
   'claims_summary',
   'claims_verbatim',
-  'count_method',
   'sources'
 ] as const;
 
@@ -87,6 +87,7 @@ export type OtherValuesType = {
   participantMeasureOthers: Record<number, string>;
   policeMeasureOthers: Record<number, string>;
   notesOthers: Record<number, string>;
+  countMethodOthers: Record<number, string>;
 };
 
 // Helper to create default form data
@@ -125,7 +126,8 @@ export function createDefaultOtherValues(): OtherValuesType {
     participantTypeOthers: { 0: '' },
     participantMeasureOthers: { 0: '' },
     policeMeasureOthers: { 0: '' },
-    notesOthers: { 0: '' }
+    notesOthers: { 0: '' },
+    countMethodOthers: { 0: '' }
   };
 }
 
@@ -140,5 +142,5 @@ export const REQUIRED_FIELDS = [
 
 // Conditional required fields
 export const CONDITIONAL_REQUIRED = {
-  inPerson: ['count_method', 'crowd_size_low', 'crowd_size_high']
+  inPerson: ['count_methods', 'crowd_size_low', 'crowd_size_high']
 } as const;

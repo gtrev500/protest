@@ -21,7 +21,6 @@ export const protestFormSchema = z.object({
   // Crowd size - using nullable to handle empty inputs, which Felte treats as undefined
   crowd_size_low: z.number().int().min(0).optional().nullable(),
   crowd_size_high: z.number().int().min(0).optional().nullable(),
-  count_method: z.string().optional(),
 
   // Single submission type (changed from array)
   submission_type: z.string().min(1, 'Please select a submission type'),
@@ -33,6 +32,7 @@ export const protestFormSchema = z.object({
   participant_measures: z.array(z.string()).default([]),
   police_measures: z.array(z.string()).default([]),
   notes: z.array(z.string()).default([]),
+  count_methods: z.array(z.string()).default([]),
   
   // Incident fields
   participant_injury: incidentStatusSchema.default('no'),
@@ -65,12 +65,12 @@ export const protestFormSchema = z.object({
 
   // Validation for in-person events
   if (!data.is_online) {
-    // Count method is required for in-person events
-    if (!data.count_method?.trim()) {
+    // Count methods are required for in-person events (at least one)
+    if (!data.count_methods || data.count_methods.length === 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Crowd counting method is required for in-person events',
-        path: ['count_method']
+        message: 'At least one crowd counting method is required for in-person events',
+        path: ['count_methods']
       });
     }
     

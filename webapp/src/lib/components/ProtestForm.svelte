@@ -1,6 +1,6 @@
 <!-- ProtestForm.svelte -->
 <script lang="ts">
-  import type { State, EventType, ParticipantType, ParticipantMeasure, PoliceMeasure, NotesOption, SubmissionType } from '$lib/types/database';
+  import type { State, EventType, ParticipantType, ParticipantMeasure, PoliceMeasure, NotesOption, SubmissionType, CountMethod } from '$lib/types/database';
   import type { FormActionResult } from '../../routes/form/+page.server';
   import { Turnstile } from 'svelte-turnstile';
   import { populateFormData, clearFormData as clearFormDataUtil } from '$lib/utils/formDataMapping';
@@ -28,6 +28,7 @@
     policeMeasures?: PoliceMeasure[];
     notesOptions?: NotesOption[];
     submissionTypes?: SubmissionType[];
+    countMethods?: CountMethod[];
     form?: FormActionResult | null;
     enhance?: any;
   }
@@ -40,6 +41,7 @@
     policeMeasures = [],
     notesOptions = [],
     submissionTypes = [],
+    countMethods = [],
     form = null,
     enhance
   }: Props = $props();
@@ -51,7 +53,7 @@
   let otherValues = $state(createDefaultOtherValues());
 
   // Destructure for backward compatibility with existing bindings
-  let { eventTypeOthers, participantTypeOthers, participantMeasureOthers, policeMeasureOthers, notesOthers } = otherValues;
+  let { eventTypeOthers, participantTypeOthers, participantMeasureOthers, policeMeasureOthers, notesOthers, countMethodOthers } = otherValues;
 
   // Track online event state to conditionally show crowd size
   let isOnline = $derived(formData.is_online);
@@ -276,14 +278,17 @@
 
     <!-- Crowd Size (only show for non-online events) -->
     {#if !isOnline}
-      <!-- Crowd Counting Method -->
-      <TextField
-        name="count_method"
-        label="Crowd Counting Method"
-        placeholder="e.g. sign-ins, counting through distributing flyers/handouts"
-        required={!isOnline}
-        bind:value={formData.count_method}
-        error={errors.count_method?.[0] || null}
+      <!-- Crowd Counting Methods -->
+      <CheckboxGroup
+        name="count_methods"
+        label="Crowd Counting Methods"
+        options={countMethods}
+        showOther
+        bind:otherValue={countMethodOthers[0]}
+        bind:values={formData.count_methods}
+        otherPlaceholder="Specify other counting method"
+        error={errors.count_methods?.[0] || null}
+        supplementalInformation="Select all methods used to estimate crowd size"
       />
       <CrowdSizeSection
         required={!isOnline}

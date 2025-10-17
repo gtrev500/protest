@@ -7,7 +7,7 @@
   export let data;
   export let form: FormActionResult | null;
 
-  const { states, eventTypes, participantTypes, participantMeasures, policeMeasures, notesOptions, submissionTypes } = data;
+  const { states, eventTypes, participantTypes, participantMeasures, policeMeasures, notesOptions, submissionTypes, countMethods } = data;
 </script>
 
 <svelte:head>
@@ -22,6 +22,7 @@
   {policeMeasures}
   {notesOptions}
   {submissionTypes}
+  {countMethods}
   {form}
   {enhance}
 />

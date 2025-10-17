@@ -17,6 +17,7 @@ export type ParticipantType = LookupOption;
 export type ParticipantMeasure = LookupOption;
 export type PoliceMeasure = LookupOption;
 export type NotesOption = LookupOption;
+export type CountMethod = LookupOption;
 
 // Form types
 export type IncidentStatus = 'yes' | 'no';
@@ -35,7 +36,6 @@ export interface ProtestData {
   claims_summary?: string;
   claims_verbatim?: string;
   is_online: boolean;
-  count_method?: string;
   crowd_size_low: number | null;
   crowd_size_high: number | null;
   participant_injury: IncidentStatus;

@@ -11,7 +11,8 @@ import type {
   ParticipantMeasure,
   PoliceMeasure,
   NotesOption,
-  SubmissionType
+  SubmissionType,
+  CountMethod
 } from '$lib/types/database';
 
 // Type for form action results passed to the page
@@ -33,7 +34,8 @@ export const load: PageServerLoad = async ({ setHeaders }) => {
     participantMeasuresRes,
     policeMeasuresRes,
     notesRes,
-    submissionTypesRes
+    submissionTypesRes,
+    countMethodsRes
   ] = await Promise.all([
     supabase.from('states').select('*').order('name'),
     supabase.from('event_types').select('*').order('name'),
@@ -41,7 +43,8 @@ export const load: PageServerLoad = async ({ setHeaders }) => {
     supabase.from('participant_measures').select('*').order('name'),
     supabase.from('police_measures').select('*').order('name'),
     supabase.from('notes_options').select('*').order('name'),
-    supabase.from('submission_types').select('*') // no sort because order matters, first option checked
+    supabase.from('submission_types').select('*'), // no sort because order matters, first option checked
+    supabase.from('count_methods').select('*').order('name')
   ]);
 
   if (statesRes.error) console.error('Error loading states:', statesRes.error);
@@ -51,6 +54,7 @@ export const load: PageServerLoad = async ({ setHeaders }) => {
   if (policeMeasuresRes.error) console.error('Error loading police measures:', policeMeasuresRes.error);
   if (notesRes.error) console.error('Error loading notes options:', notesRes.error);
   if (submissionTypesRes.error) console.error('Error loading submission types:', submissionTypesRes.error);
+  if (countMethodsRes.error) console.error('Error loading count methods:', countMethodsRes.error);
 
   return {
     states: (statesRes.data ?? []) as State[],
@@ -59,7 +63,8 @@ export const load: PageServerLoad = async ({ setHeaders }) => {
     participantMeasures: (participantMeasuresRes.data ?? []) as ParticipantMeasure[],
     policeMeasures: (policeMeasuresRes.data ?? []) as PoliceMeasure[],
     notesOptions: (notesRes.data ?? []) as NotesOption[],
-    submissionTypes: (submissionTypesRes.data ?? []) as SubmissionType[]
+    submissionTypes: (submissionTypesRes.data ?? []) as SubmissionType[],
+    countMethods: (countMethodsRes.data ?? []) as CountMethod[]
   };
 };
 
@@ -92,7 +97,7 @@ export const actions: Actions = {
 
     // Convert checkbox arrays to arrays if they're single values (excluding submission_type now)
     const checkboxFields = ['event_types', 'participant_types',
-                           'participant_measures', 'police_measures', 'notes'];
+                           'participant_measures', 'police_measures', 'notes', 'count_methods'];
     for (const field of checkboxFields) {
       if (rawData[field] && !Array.isArray(rawData[field])) {
         rawData[field] = [rawData[field]];
@@ -110,10 +115,10 @@ export const actions: Actions = {
       rawData.crowd_size_low = rawData.crowd_size_low === '' ? null : parseInt(rawData.crowd_size_low) || null;
       rawData.crowd_size_high = rawData.crowd_size_high === '' ? null : parseInt(rawData.crowd_size_high) || null;
     } else {
-      // Clear crowd size fields for online events
+      // Clear crowd size fields and count methods for online events
       rawData.crowd_size_low = null;
       rawData.crowd_size_high = null;
-      rawData.count_method = '';
+      rawData.count_methods = [];
     }
     
     // Validate form data with Zod FIRST
@@ -160,7 +165,8 @@ export const actions: Actions = {
         participantTypeOthers: { 0: rawData.participant_types_other || '' },
         participantMeasureOthers: { 0: rawData.participant_measures_other || '' },
         policeMeasureOthers: { 0: rawData.police_measures_other || '' },
-        notesOthers: { 0: rawData.notes_other || '' }
+        notesOthers: { 0: rawData.notes_other || '' },
+        countMethodOthers: { 0: rawData.count_methods_other || '' }
       });
       
       // Submit using the database function

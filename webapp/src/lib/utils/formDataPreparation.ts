@@ -7,6 +7,7 @@ export interface OtherValues {
   participantMeasureOthers: Record<number, string>;
   policeMeasureOthers: Record<number, string>;
   notesOthers: Record<number, string>;
+  countMethodOthers: Record<number, string>;
 }
 
 export function prepareProtestData(values: any): ProtestData {
@@ -22,7 +23,6 @@ export function prepareProtestData(values: any): ProtestData {
     claims_summary: values.claims_summary,
     claims_verbatim: values.claims_verbatim,
     is_online: values.is_online,
-    count_method: values.count_method,
     crowd_size_low: values.crowd_size_low || null,
     crowd_size_high: values.crowd_size_high || null,
     participant_injury: values.participant_injury,
@@ -92,6 +92,11 @@ export function prepareSubmissionData(
     otherValues.notesOthers
   );
 
+  const countMethodsData = prepareJunctionData(
+    values.count_methods,
+    otherValues.countMethodOthers
+  );
+
   return {
     protest_data: protestData,
     submission_types_data: submissionTypesData,
@@ -99,6 +104,7 @@ export function prepareSubmissionData(
     participant_types_data: participantTypesData,
     participant_measures_data: participantMeasuresData,
     police_measures_data: policeMeasuresData,
-    notes_data: notesData
+    notes_data: notesData,
+    count_methods_data: countMethodsData
   };
 }

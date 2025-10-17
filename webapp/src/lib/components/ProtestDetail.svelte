@@ -105,11 +105,11 @@
             </dd>
           </div>
         {/if}
-        {#if protest.count_method}
+        {#if protest.count_methods && protest.count_methods.length > 0}
           <div>
-            <dt class="text-sm font-medium text-gray-500">Crowd Counting Method</dt>
+            <dt class="text-sm font-medium text-gray-500">Crowd Counting Methods</dt>
             <dd class="mt-1 text-sm text-gray-900">
-              {protest.count_method}
+              {protest.count_methods.join(', ')}
             </dd>
           </div>
         {/if}

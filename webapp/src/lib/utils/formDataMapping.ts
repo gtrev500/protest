@@ -30,7 +30,6 @@ export interface ProtestApiResponse {
   claims_summary?: string;
   claims_verbatim?: string;
   is_online?: boolean;
-  count_method?: string;
   sources?: string;
 
   // Crowd sizes are numbers from API
@@ -57,6 +56,7 @@ export interface ProtestApiResponse {
   participant_measures?: Array<{ measure_id: number; other_value?: string }>;
   police_measures?: Array<{ measure_id: number; other_value?: string }>;
   notes?: Array<{ note_id: number; other_value?: string }>;
+  count_methods?: Array<{ count_method_id: number; other_value?: string }>;
 }
 
 // Simple, declarative helper functions for form data manipulation
@@ -92,7 +92,8 @@ export function populateFormData(
     participant_types: { idField: 'participant_type_id', otherField: 'participantTypeOthers' },
     participant_measures: { idField: 'measure_id', otherField: 'participantMeasureOthers' },
     police_measures: { idField: 'measure_id', otherField: 'policeMeasureOthers' },
-    notes: { idField: 'note_id', otherField: 'notesOthers' }
+    notes: { idField: 'note_id', otherField: 'notesOthers' },
+    count_methods: { idField: 'count_method_id', otherField: 'countMethodOthers' }
   };
 
   Object.entries(multiSelectMap).forEach(([fieldName, config]) => {
