@@ -71,6 +71,7 @@
 
   // Plain variable for synchronous check during page unload
   let hasTrackedAbandonment = false;
+  let hasTrackedClientInvalidation = false;
 
   // Track single submission type and reference
   let selectedSubmissionType = $state('');
@@ -82,6 +83,7 @@
   let turnstileError = $state(false);
   // Ref to the Turnstile container for scrolling on validation failure
   let turnstileContainer: HTMLDivElement | null = null;
+  let formElement: HTMLFormElement | null = null;
   
   // Get the site key with proper error handling
   const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
@@ -90,6 +92,51 @@
   const errors = $derived(form?.errors || {});
   const errorMessage = $derived(form?.message || '');
   const hasErrors = $derived(Object.keys(errors).length > 0 || errorMessage);
+
+  function trackValidationFailure(source: 'client' | 'server', fields: string[] = []) {
+    const normalizedFields = Array.from(new Set(fields.filter(Boolean)));
+
+    trackEventBeacon('form_validation_failed', {
+      source,
+      error_count: normalizedFields.length,
+      fields: normalizedFields
+    });
+  }
+
+  function getFieldIdentifier(element: Element): string {
+    const el = element as HTMLInputElement;
+    return el.name || element.getAttribute('name') || el.id || element.getAttribute('aria-label') || '';
+  }
+
+  function handleClientInvalid(event: Event) {
+    if (!formElement || hasTrackedClientInvalidation) {
+      return;
+    }
+
+    hasTrackedClientInvalidation = true;
+
+    const invalidControls = Array.from(formElement.querySelectorAll(':invalid'));
+    const fields: string[] = invalidControls
+      .map(getFieldIdentifier)
+      .filter(Boolean);
+
+    if (fields.length === 0 && event.target instanceof HTMLElement) {
+      const fallback = getFieldIdentifier(event.target);
+      if (fallback) {
+        fields.push(fallback);
+      }
+    }
+
+    trackValidationFailure('client', fields);
+
+    setTimeout(() => {
+      hasTrackedClientInvalidation = false;
+    }, 0);
+  }
+
+  function resetClientInvalidationTracking(_: Event) {
+    hasTrackedClientInvalidation = false;
+  }
 
   // Fetch and populate protest data when reference changes
   async function fetchAndPopulateProtestData(protestId: string) {
@@ -298,10 +345,7 @@
           const errorFields = Object.keys(errors);
 
           if (errorFields.length > 0) {
-            trackEvent('form_validation_failed', {
-              error_count: errorFields.length,
-              fields: errorFields
-            });
+            trackValidationFailure('server', errorFields);
           }
 
           // If the action failed due to CAPTCHA, show the inline error and scroll to the widget
@@ -321,6 +365,10 @@
         }
       };
     }}
+    bind:this={formElement}
+    oninvalidcapture={handleClientInvalid}
+    oninput={resetClientInvalidationTracking}
+    onchange={resetClientInvalidationTracking}
     class="space-y-6"
   >
     <!-- Basic Information -->
