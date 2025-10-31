@@ -1,65 +1,52 @@
 <!-- ProtestDashboard.svelte -->
 <script>
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import { supabase } from '$lib/supabase';
 
-  export let showMetrics = false;
+  let { showMetrics = false } = $props();
 
-  let protests = [];
-  let stats = null;
-  let loading = true;
-  let searchTerm = '';
-  let selectedState = '';
-  let startDate = '';
-  let endDate = '';
-  let page = 1;
+  let protests = $state([]);
+  let stats = $state(null);
+  let loading = $state(true);
+  let searchTerm = $state('');
+  let selectedState = $state('');
+  let startDate = $state('');
+  let endDate = $state('');
+  let page = $state(1);
   let pageSize = 20;
-  let totalCount = 0;
-  let sortField = 'date_of_event';
-  let sortOrder = 'desc';
+  let totalCount = $state(0);
+  let sortField = $state('date_of_event');
+  let sortOrder = $state('desc');
+  let searchDebounceTimer;
 
   async function loadProtests() {
     loading = true;
-    
+
     try {
-      // Build query
-      let query = supabase
-        .from('protest_details')
-        .select('*', { count: 'exact' });
-
-      // Apply filters
-      if (searchTerm) {
-        query = query.textSearch('search_vector', searchTerm);
-      }
-      if (selectedState) {
-        query = query.eq('state_code', selectedState);
-      }
-      if (startDate) {
-        query = query.gte('date_of_event', startDate);
-      }
-      if (endDate) {
-        query = query.lte('date_of_event', endDate);
-      }
-
-      // Pagination
-      const from = (page - 1) * pageSize;
-      const to = from + pageSize - 1;
-      
-      const { data, error, count } = await query
-        .order(sortField, { ascending: sortOrder === 'asc' })
-        .range(from, to);
+      // Use the new RPC function for proper search handling
+      const { data, error } = await supabase.rpc('search_protest_dashboard', {
+        query_text: searchTerm || null,
+        state_filter: selectedState || null,
+        start_date_filter: startDate || null,
+        end_date_filter: endDate || null,
+        sort_field: sortField,
+        sort_order: sortOrder,
+        limit_count: pageSize,
+        offset_count: (page - 1) * pageSize
+      });
 
       if (error) throw error;
 
       protests = data || [];
-      totalCount = count || 0;
+      // Get total count from the first row (added via COUNT(*) OVER())
+      totalCount = protests.length > 0 ? protests[0].total_count : 0;
 
       // Load stats
       const { data: statsData } = await supabase.rpc('get_protest_stats', {
         start_date: startDate || null,
         end_date: endDate || null
       });
-      
+
       stats = statsData;
     } catch (error) {
       console.error('Error loading protests:', error);
@@ -69,7 +56,7 @@
   }
 
   // Load states for filter
-  let states = [];
+  let states = $state([]);
   async function loadStates() {
     const { data } = await supabase.from('states').select('*').order('name');
     states = data || [];
@@ -80,8 +67,12 @@
     loadProtests();
   });
 
+  onDestroy(() => {
+    clearTimeout(searchDebounceTimer);
+  });
+
   // Computed values
-  $: totalPages = Math.ceil(totalCount / pageSize);
+  let totalPages = $derived(Math.ceil(totalCount / pageSize));
   
   function formatNumber(num) {
     if (!num) return '0';
@@ -103,6 +94,15 @@
   function handleFilterChange() {
     page = 1;
     loadProtests();
+  }
+
+  // Debounced search handler for search input
+  function handleSearchInput() {
+    clearTimeout(searchDebounceTimer);
+    searchDebounceTimer = window.setTimeout(() => {
+      page = 1;
+      loadProtests();
+    }, 300); // 300ms debounce
   }
 
   // Handle sort change
@@ -167,12 +167,25 @@
       <div>
         <label for="search" class="block text-sm font-medium text-gray-700 mb-1">
           Search
+          <span class="relative inline-block group">
+            <svg class="inline-block w-4 h-4 ml-1 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+            </svg>
+            <span class="invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-md shadow-lg w-72 pointer-events-none">
+              <strong class="block mb-1">Advanced Search:</strong>
+              • Phrases: "exact phrase"<br/>
+              • OR: term1 OR term2<br/>
+              • Exclude: -unwanted<br/>
+              • Example: "police reform" Seattle -2020
+              <span class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-800"></span>
+            </span>
+          </span>
         </label>
         <input
           type="text"
           id="search"
           bind:value={searchTerm}
-          on:input={handleFilterChange}
+          on:input={handleSearchInput}
           placeholder="Search protests..."
           class="w-full rounded-md border-gray-300"
         />
