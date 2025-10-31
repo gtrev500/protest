@@ -1,6 +1,6 @@
 <!-- ProtestDashboard.svelte -->
 <script>
-  import { onMount, onDestroy } from 'svelte';
+  import { onMount } from 'svelte';
   import { supabase } from '$lib/supabase';
 
   let { showMetrics = false } = $props();
@@ -18,6 +18,20 @@
   let sortField = $state('date_of_event');
   let sortOrder = $state('desc');
   let searchDebounceTimer;
+  let showSearchHelp = $state(false);
+  let searchHelpButtonEl;
+  let searchHelpTooltipEl;
+
+  function handleWindowClick(event) {
+    if (!showSearchHelp) return;
+    const target = event.target;
+    const isNode = target instanceof Node;
+    const clickedTrigger = isNode && searchHelpButtonEl && searchHelpButtonEl.contains(target);
+    const clickedTooltip = isNode && searchHelpTooltipEl && searchHelpTooltipEl.contains(target);
+    if (!clickedTrigger && !clickedTooltip) {
+      showSearchHelp = false;
+    }
+  }
 
   async function loadProtests() {
     loading = true;
@@ -65,10 +79,14 @@
   onMount(() => {
     loadStates();
     loadProtests();
-  });
 
-  onDestroy(() => {
-    clearTimeout(searchDebounceTimer);
+    // Add click-outside listener for tooltip
+    document.addEventListener('click', handleWindowClick);
+
+    return () => {
+      clearTimeout(searchDebounceTimer);
+      document.removeEventListener('click', handleWindowClick);
+    };
   });
 
   // Computed values
@@ -167,25 +185,41 @@
       <div>
         <label for="search" class="block text-sm font-medium text-gray-700 mb-1">
           Search
-          <span class="relative inline-block group">
-            <svg class="inline-block w-4 h-4 ml-1 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
+          <button
+            type="button"
+            class="relative inline-flex items-center group align-middle ml-1 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+            aria-label="Toggle advanced search help"
+            aria-expanded={showSearchHelp}
+            aria-controls="search-help-tooltip"
+            onclick={() => (showSearchHelp = !showSearchHelp)}
+            onkeydown={(e) => { if (e.key === 'Escape') showSearchHelp = false; }}
+            bind:this={searchHelpButtonEl}
+          >
+            <svg class="inline-block w-4 h-4 text-gray-400 hover:text-gray-600" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
             </svg>
-            <span class="invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-md shadow-lg w-72 pointer-events-none">
-              <strong class="block mb-1">Advanced Search:</strong>
-              • Phrases: "exact phrase"<br/>
-              • OR: term1 OR term2<br/>
-              • Exclude: -unwanted<br/>
-              • Example: "police reform" Seattle -2020
-              <span class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-800"></span>
+            <span
+              id="search-help-tooltip"
+              role="tooltip"
+              class="invisible opacity-0 group-hover:visible group-hover:opacity-100 group-focus:visible group-focus:opacity-100 transition-opacity duration-200 absolute z-50 top-full left-0 translate-x-0 mt-2 md:top-auto md:bottom-full md:left-1/2 md:-translate-x-1/2 md:mt-0 md:mb-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-md shadow-lg max-w-[90vw] sm:w-72 break-words"
+              class:visible={showSearchHelp}
+              class:opacity-100={showSearchHelp}
+              bind:this={searchHelpTooltipEl}
+            >
+              <strong class="block mb-1">Search Tips:</strong>
+              "exact phrase"<br/>
+              term1 OR term2<br/>
+              -excludeTerm<br/>
+              <span class="text-xs text-gray-300 mt-1 block">Ex: "No Kings" CT -Granby</span>
+              <span class="hidden md:block absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-800"></span>
             </span>
-          </span>
+          </button>
         </label>
         <input
           type="text"
           id="search"
           bind:value={searchTerm}
-          on:input={handleSearchInput}
+          oninput={handleSearchInput}
           placeholder="Search protests..."
           class="w-full rounded-md border-gray-300"
         />
@@ -198,7 +232,7 @@
         <select
           id="state"
           bind:value={selectedState}
-          on:change={handleFilterChange}
+          onchange={handleFilterChange}
           class="w-full rounded-md border-gray-300"
         >
           <option value="">All States</option>
@@ -216,7 +250,7 @@
           type="date"
           id="start_date"
           bind:value={startDate}
-          on:change={handleFilterChange}
+          onchange={handleFilterChange}
           class="w-full rounded-md border-gray-300"
         />
       </div>
@@ -229,7 +263,7 @@
           type="date"
           id="end_date"
           bind:value={endDate}
-          on:change={handleFilterChange}
+          onchange={handleFilterChange}
           class="w-full rounded-md border-gray-300"
         />
       </div>
@@ -254,7 +288,7 @@
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 <button
-                  on:click={() => handleColumnSort('date_of_event')}
+                onclick={() => handleColumnSort('date_of_event')}
                   class="flex items-center gap-1 hover:text-gray-700 transition-colors"
                 >
                   Event Date
@@ -263,7 +297,7 @@
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 <button
-                  on:click={() => handleColumnSort('created_at')}
+                onclick={() => handleColumnSort('created_at')}
                   class="flex items-center gap-1 hover:text-gray-700 transition-colors"
                 >
                   Submitted
@@ -346,14 +380,14 @@
       <div class="bg-gray-50 px-4 py-3 flex items-center justify-between sm:px-6">
         <div class="flex-1 flex justify-between sm:hidden">
           <button
-            on:click={() => { page--; loadProtests(); }}
+            onclick={() => { page--; loadProtests(); }}
             disabled={page === 1}
             class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
           >
             Previous
           </button>
           <button
-            on:click={() => { page++; loadProtests(); }}
+            onclick={() => { page++; loadProtests(); }}
             disabled={page === totalPages}
             class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
           >
@@ -371,14 +405,14 @@
           <div>
             <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
               <button
-                on:click={() => { page = 1; loadProtests(); }}
+                onclick={() => { page = 1; loadProtests(); }}
                 disabled={page === 1}
                 class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
               >
                 First
               </button>
               <button
-                on:click={() => { page--; loadProtests(); }}
+                onclick={() => { page--; loadProtests(); }}
                 disabled={page === 1}
                 class="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
               >
@@ -388,14 +422,14 @@
                 Page {page} of {totalPages}
               </span>
               <button
-                on:click={() => { page++; loadProtests(); }}
+                onclick={() => { page++; loadProtests(); }}
                 disabled={page === totalPages}
                 class="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
               >
                 Next
               </button>
               <button
-                on:click={() => { page = totalPages; loadProtests(); }}
+                onclick={() => { page = totalPages; loadProtests(); }}
                 disabled={page === totalPages}
                 class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
               >
