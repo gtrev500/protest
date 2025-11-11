@@ -6,10 +6,12 @@
 
   let protest = null;
   let loading = true;
+  let referencedProtest = null;
+  let corrections = [];
 
   async function loadProtest() {
     const id = $page.params.id;
-    
+
     try {
       // Get protest details
       const { data, error } = await supabase
@@ -19,12 +21,63 @@
         .single();
 
       if (error) throw error;
-      
+
       protest = data;
+
+      // Load related records
+      await loadRelatedRecords();
     } catch (error) {
       console.error('Error loading protest:', error);
     } finally {
       loading = false;
+    }
+  }
+
+  async function loadRelatedRecords() {
+    if (!protest) return;
+
+    try {
+      // Check if this is a data correction
+      const isCorrection = protest.submission_types?.includes('data correction');
+
+      if (isCorrection) {
+        // Fetch the original protest this corrects
+        const { data: originalData } = await supabase
+          .from('protests')
+          .select('referenced_protest_id')
+          .eq('id', protest.id)
+          .single();
+
+        if (originalData?.referenced_protest_id) {
+          const { data: refData } = await supabase
+            .from('protest_details')
+            .select('id, title, date_of_event, locality, state_code, submission_types')
+            .eq('id', originalData.referenced_protest_id)
+            .single();
+
+          referencedProtest = refData;
+        }
+      } else {
+        // Fetch any corrections that reference this protest
+        const { data: correctionsData } = await supabase
+          .from('protests')
+          .select('id')
+          .eq('referenced_protest_id', protest.id);
+
+        if (correctionsData && correctionsData.length > 0) {
+          const correctionIds = correctionsData.map(c => c.id);
+
+          const { data: correctionDetails } = await supabase
+            .from('protest_details')
+            .select('id, title, date_of_event, locality, state_code, submission_types, created_at')
+            .in('id', correctionIds)
+            .order('created_at', { ascending: false });
+
+          corrections = correctionDetails || [];
+        }
+      }
+    } catch (error) {
+      console.error('Error loading related records:', error);
     }
   }
 
@@ -302,6 +355,88 @@
             <li class="text-sm text-gray-900">{note}</li>
           {/each}
         </ul>
+      </div>
+    {/if}
+
+    <!-- Submission Type Info -->
+    {#if protest.submission_types && protest.submission_types.length > 0}
+      <div class="bg-white shadow rounded-lg p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Submission Information</h2>
+
+        <div class="mb-4">
+          <dt class="text-sm font-medium text-gray-500 mb-2">Submission Type</dt>
+          <dd class="flex flex-wrap gap-2">
+            {#each protest.submission_types as type}
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {type === 'data correction' ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'}">
+                {type}
+              </span>
+            {/each}
+          </dd>
+        </div>
+
+        <!-- If this is a data correction, show the original record -->
+        {#if referencedProtest}
+          <div class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <h3 class="text-sm font-semibold text-blue-900 mb-2">
+              This is a correction of:
+            </h3>
+            <a
+              href="/protest/{referencedProtest.id}"
+              class="block hover:bg-blue-100 p-3 rounded transition-colors"
+            >
+              <div class="font-medium text-blue-900">{referencedProtest.title}</div>
+              <div class="text-sm text-blue-700 mt-1">
+                {formatDate(referencedProtest.date_of_event)} • {referencedProtest.locality}, {referencedProtest.state_code}
+              </div>
+              {#if referencedProtest.submission_types}
+                <div class="flex gap-1 mt-2">
+                  {#each referencedProtest.submission_types as type}
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {type === 'data correction' ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'}">
+                      {type}
+                    </span>
+                  {/each}
+                </div>
+              {/if}
+            </a>
+            <p class="text-xs text-blue-600 mt-2">
+              Click to view the original record
+            </p>
+          </div>
+        {/if}
+
+        <!-- If this is a new record, show any corrections -->
+        {#if corrections.length > 0}
+          <div class="mt-4 p-4 bg-amber-50 rounded-lg border border-amber-200">
+            <h3 class="text-sm font-semibold text-amber-900 mb-2">
+              {corrections.length === 1 ? 'This record has 1 correction:' : `This record has ${corrections.length} corrections:`}
+            </h3>
+            <div class="space-y-2">
+              {#each corrections as correction}
+                <a
+                  href="/protest/{correction.id}"
+                  class="block hover:bg-amber-100 p-3 rounded transition-colors"
+                >
+                  <div class="font-medium text-amber-900">{correction.title}</div>
+                  <div class="text-sm text-amber-700 mt-1">
+                    {formatDate(correction.date_of_event)} • {correction.locality}, {correction.state_code}
+                  </div>
+                  {#if correction.submission_types}
+                    <div class="flex gap-1 mt-2">
+                      {#each correction.submission_types as type}
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {type === 'data correction' ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'}">
+                          {type}
+                        </span>
+                      {/each}
+                    </div>
+                  {/if}
+                </a>
+              {/each}
+            </div>
+            <p class="text-xs text-amber-600 mt-2">
+              Click to view {corrections.length === 1 ? 'the correction' : 'a correction'}
+            </p>
+          </div>
+        {/if}
       </div>
     {/if}
 
