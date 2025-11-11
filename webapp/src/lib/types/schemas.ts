@@ -6,7 +6,17 @@ export const incidentStatusSchema = z.enum(['yes', 'no']);
 // Main form schema
 export const protestFormSchema = z.object({
   // Basic info
-  date_of_event: z.string().min(1, 'Date is required'),
+  date_of_event: z
+    .string()
+    .min(1, 'Date is required')
+    .refine((v) => /^\d{4}-\d{2}-\d{2}$/.test(v), { message: 'Invalid date format (YYYY-MM-DD)' })
+    .refine((v) => !Number.isNaN(Date.parse(v)), { message: 'Invalid calendar date' })
+    .refine((v) => {
+      const max = new Date();
+      max.setDate(max.getDate() + 5);
+      return new Date(v) <= max;
+    }, { message: 'Date cannot be more than 5 days from today' })
+    .refine((v) => new Date(v) >= new Date('1900-01-01'), { message: 'Date is too early' }),
   locality: z.string().min(1, 'City is required'),
   state_code: z.string().min(1, 'State is required'),
   location_name: z.string().optional(),

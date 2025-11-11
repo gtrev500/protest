@@ -1,37 +1,39 @@
 <!-- ProtestDashboard.svelte -->
-<script>
+<script lang="ts">
   import { onMount } from 'svelte';
   import { supabase } from '$lib/supabase';
+  import { Tooltip, DateRangePicker, Combobox, type DateRange } from 'bits-ui';
+  import { CalendarDate } from '@internationalized/date';
 
   let { showMetrics = false } = $props();
 
-  let protests = $state([]);
-  let stats = $state(null);
+  let protests = $state<any[]>([]);
+  let stats = $state<any>(null);
   let loading = $state(true);
   let searchTerm = $state('');
   let selectedState = $state('');
-  let startDate = $state('');
-  let endDate = $state('');
+  let dateRange = $state<DateRange | undefined>(undefined);
   let page = $state(1);
   let pageSize = 20;
   let totalCount = $state(0);
   let sortField = $state('date_of_event');
   let sortOrder = $state('desc');
-  let searchDebounceTimer;
+  let searchDebounceTimer: number | undefined;
   let showSearchHelp = $state(false);
-  let searchHelpButtonEl;
-  let searchHelpTooltipEl;
+  let searchValue = $state('');
 
-  function handleWindowClick(event) {
-    if (!showSearchHelp) return;
-    const target = event.target;
-    const isNode = target instanceof Node;
-    const clickedTrigger = isNode && searchHelpButtonEl && searchHelpButtonEl.contains(target);
-    const clickedTooltip = isNode && searchHelpTooltipEl && searchHelpTooltipEl.contains(target);
-    if (!clickedTrigger && !clickedTooltip) {
-      showSearchHelp = false;
-    }
-  }
+  // Derived values for date range (convert CalendarDate to string for API)
+  let startDate = $derived(
+    dateRange?.start
+      ? `${dateRange.start.year}-${String(dateRange.start.month).padStart(2, '0')}-${String(dateRange.start.day).padStart(2, '0')}`
+      : ''
+  );
+
+  let endDate = $derived(
+    dateRange?.end
+      ? `${dateRange.end.year}-${String(dateRange.end.month).padStart(2, '0')}-${String(dateRange.end.day).padStart(2, '0')}`
+      : ''
+  );
 
   async function loadProtests() {
     loading = true;
@@ -70,34 +72,47 @@
   }
 
   // Load states for filter
-  let states = $state([]);
+  let states = $state<any[]>([]);
   async function loadStates() {
     const { data } = await supabase.from('states').select('*').order('name');
     states = data || [];
   }
 
+  // Filter states based on search input for Combobox
+  const filteredStates = $derived(
+    searchValue === ''
+      ? states
+      : states.filter((state) =>
+          state.name.toLowerCase().includes(searchValue.toLowerCase()) ||
+          state.code.toLowerCase().includes(searchValue.toLowerCase())
+        )
+  );
+
+  // Watch for date range changes and trigger filter
+  $effect(() => {
+    if (dateRange !== undefined) {
+      handleFilterChange();
+    }
+  });
+
   onMount(() => {
     loadStates();
     loadProtests();
 
-    // Add click-outside listener for tooltip
-    document.addEventListener('click', handleWindowClick);
-
     return () => {
       clearTimeout(searchDebounceTimer);
-      document.removeEventListener('click', handleWindowClick);
     };
   });
 
   // Computed values
   let totalPages = $derived(Math.ceil(totalCount / pageSize));
   
-  function formatNumber(num) {
+  function formatNumber(num: number) {
     if (!num) return '0';
     return new Intl.NumberFormat().format(num);
   }
 
-  function formatDate(dateStr) {
+  function formatDate(dateStr: string) {
     if (!dateStr) return '';
     // Check if it's already a timestamp with time (contains 'T')
     if (dateStr.includes('T')) {
@@ -130,7 +145,7 @@
   }
 
   // Handle column header click for sorting
-  function handleColumnSort(field) {
+  function handleColumnSort(field: string) {
     if (sortField === field) {
       // Toggle sort order if clicking same column
       sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
@@ -143,7 +158,7 @@
   }
 
   // Get sort icon for column header
-  function getSortIcon(field) {
+  function getSortIcon(field: string) {
     if (sortField !== field) return ''; // No icon when not sorted
     return sortOrder === 'asc' ? '↑' : '↓';
   }
@@ -185,35 +200,33 @@
       <div>
         <label for="search" class="block text-sm font-medium text-gray-700 mb-1">
           Search
-          <button
-            type="button"
-            class="relative inline-flex items-center group align-middle ml-1 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
-            aria-label="Toggle advanced search help"
-            aria-expanded={showSearchHelp}
-            aria-controls="search-help-tooltip"
-            onclick={() => (showSearchHelp = !showSearchHelp)}
-            onkeydown={(e) => { if (e.key === 'Escape') showSearchHelp = false; }}
-            bind:this={searchHelpButtonEl}
-          >
-            <svg class="inline-block w-4 h-4 text-gray-400 hover:text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-            </svg>
-            <span
-              id="search-help-tooltip"
-              role="tooltip"
-              class="invisible opacity-0 group-hover:visible group-hover:opacity-100 group-focus:visible group-focus:opacity-100 transition-opacity duration-200 absolute z-50 top-full left-0 translate-x-0 mt-2 md:top-auto md:bottom-full md:left-1/2 md:-translate-x-1/2 md:mt-0 md:mb-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-md shadow-lg max-w-[90vw] sm:w-72 break-words"
-              class:visible={showSearchHelp}
-              class:opacity-100={showSearchHelp}
-              bind:this={searchHelpTooltipEl}
-            >
-              <strong class="block mb-1">Search Tips:</strong>
-              "exact phrase"<br/>
-              term1 OR term2<br/>
-              -excludeTerm<br/>
-              <span class="text-xs text-gray-300 mt-1 block">Ex: "No Kings" CT -Granby</span>
-              <span class="hidden md:block absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-800"></span>
-            </span>
-          </button>
+          <Tooltip.Provider delayDuration={200}>
+            <Tooltip.Root bind:open={showSearchHelp}>
+              <Tooltip.Trigger
+                class="relative inline-flex items-center group align-middle ml-1 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+                aria-label="Toggle advanced search help"
+              >
+                <svg class="inline-block w-4 h-4 text-gray-400 hover:text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                </svg>
+              </Tooltip.Trigger>
+
+              <Tooltip.Portal>
+                <Tooltip.Content
+                  side="top"
+                  sideOffset={8}
+                  class="px-3 py-2 bg-gray-800 text-white text-sm rounded-md shadow-lg max-w-[90vw] sm:w-72 break-words z-50"
+                >
+                  <strong class="block mb-1">Search Tips:</strong>
+                  "exact phrase"<br/>
+                  term1 OR term2<br/>
+                  -excludeTerm<br/>
+                  <span class="text-xs text-gray-300 mt-1 block">Ex: "No Kings" CT -Granby</span>
+                  <Tooltip.Arrow class="fill-gray-800" />
+                </Tooltip.Content>
+              </Tooltip.Portal>
+            </Tooltip.Root>
+          </Tooltip.Provider>
         </label>
         <input
           type="text"
@@ -226,46 +239,198 @@
       </div>
 
       <div>
-        <label for="state" class="block text-sm font-medium text-gray-700 mb-1">
+        <label for="state-combobox" class="block text-sm font-medium text-gray-700 mb-1">
           State
         </label>
-        <select
-          id="state"
+        <Combobox.Root
+          type="single"
           bind:value={selectedState}
-          onchange={handleFilterChange}
-          class="w-full rounded-md border-gray-300"
+          onOpenChange={(isOpen) => {
+            if (!isOpen) searchValue = '';
+            if (!isOpen && selectedState !== '') handleFilterChange();
+          }}
         >
-          <option value="">All States</option>
-          {#each states as state}
-            <option value={state.code}>{state.name}</option>
-          {/each}
-        </select>
+          <div class="relative">
+            <Combobox.Input
+              id="state-combobox"
+              placeholder="Search states..."
+              oninput={(e) => (searchValue = e.currentTarget.value)}
+              class="w-full rounded-md border-gray-300 pr-10 focus:ring-blue-500 focus:border-blue-500"
+              aria-label="Search states"
+            />
+
+            <Combobox.Trigger
+              class="absolute right-0 top-0 h-full px-3 flex items-center text-gray-400 hover:text-gray-600"
+              aria-label="Toggle state dropdown"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </Combobox.Trigger>
+          </div>
+
+          <Combobox.Portal>
+            <Combobox.Content
+              class="bg-white border border-gray-200 rounded-md shadow-lg mt-1 z-50 max-h-60 overflow-hidden"
+              sideOffset={4}
+            >
+              <Combobox.Viewport class="p-1">
+                <Combobox.Item
+                  value=""
+                  label="All States"
+                  class="px-3 py-2 text-sm cursor-pointer rounded hover:bg-blue-50 focus:bg-blue-50 focus:outline-none data-[highlighted]:bg-blue-100 data-[selected]:bg-blue-600 data-[selected]:text-white"
+                >
+                  {#snippet children({ selected })}
+                    <div class="flex items-center justify-between">
+                      <span>All States</span>
+                      {#if selected}
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                        </svg>
+                      {/if}
+                    </div>
+                  {/snippet}
+                </Combobox.Item>
+
+                {#each filteredStates as state}
+                  <Combobox.Item
+                    value={state.code}
+                    label={state.name}
+                    class="px-3 py-2 text-sm cursor-pointer rounded hover:bg-blue-50 focus:bg-blue-50 focus:outline-none data-[highlighted]:bg-blue-100 data-[selected]:bg-blue-600 data-[selected]:text-white"
+                  >
+                    {#snippet children({ selected })}
+                      <div class="flex items-center justify-between">
+                        <span>{state.name} ({state.code})</span>
+                        {#if selected}
+                          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                          </svg>
+                        {/if}
+                      </div>
+                    {/snippet}
+                  </Combobox.Item>
+                {:else}
+                  <div class="px-3 py-2 text-sm text-gray-500 text-center">
+                    No states found
+                  </div>
+                {/each}
+              </Combobox.Viewport>
+
+              <Combobox.ScrollDownButton class="flex justify-center py-1">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+              </Combobox.ScrollDownButton>
+            </Combobox.Content>
+          </Combobox.Portal>
+        </Combobox.Root>
       </div>
 
-      <div>
-        <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">
-          Start Date
+      <div class="md:col-span-2">
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          Date Range
         </label>
-        <input
-          type="date"
-          id="start_date"
-          bind:value={startDate}
-          onchange={handleFilterChange}
-          class="w-full rounded-md border-gray-300"
-        />
-      </div>
 
-      <div>
-        <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">
-          End Date
-        </label>
-        <input
-          type="date"
-          id="end_date"
-          bind:value={endDate}
-          onchange={handleFilterChange}
-          class="w-full rounded-md border-gray-300"
-        />
+        <DateRangePicker.Root
+          bind:value={dateRange}
+          weekdayFormat="short"
+          class="flex flex-col gap-1.5"
+        >
+          <div class="flex gap-2 items-center border border-gray-300 rounded-md px-3 py-2 bg-white hover:border-gray-400 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent">
+            {#each ["start", "end"] as type}
+              <DateRangePicker.Input type={type as "start" | "end"} class="flex items-center">
+                {#snippet children({ segments })}
+                  <div class="flex items-center gap-0.5">
+                    {#each segments as { part, value }}
+                      <DateRangePicker.Segment
+                        {part}
+                        class="px-0.5 rounded focus:bg-blue-100 focus:outline-none tabular-nums text-sm"
+                      >
+                        {value}
+                      </DateRangePicker.Segment>
+                    {/each}
+                  </div>
+                {/snippet}
+              </DateRangePicker.Input>
+              {#if type === "start"}
+                <span class="text-gray-400">→</span>
+              {/if}
+            {/each}
+
+            <DateRangePicker.Trigger
+              class="ml-auto text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded p-1"
+              aria-label="Open date picker"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </DateRangePicker.Trigger>
+          </div>
+
+          <DateRangePicker.Content
+            side="bottom"
+            sideOffset={8}
+            class="bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50"
+          >
+            <DateRangePicker.Calendar class="flex flex-col gap-4">
+              {#snippet children({ months, weekdays })}
+                <DateRangePicker.Header class="flex items-center justify-between mb-2">
+                  <DateRangePicker.PrevButton class="p-2 hover:bg-gray-100 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                  </DateRangePicker.PrevButton>
+                  <DateRangePicker.Heading class="font-semibold text-gray-900" />
+                  <DateRangePicker.NextButton class="p-2 hover:bg-gray-100 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                    </svg>
+                  </DateRangePicker.NextButton>
+                </DateRangePicker.Header>
+
+                {#each months as month}
+                  <DateRangePicker.Grid class="border-collapse">
+                    <DateRangePicker.GridHead>
+                      <DateRangePicker.GridRow class="flex mb-1">
+                        {#each weekdays as day}
+                          <DateRangePicker.HeadCell class="w-10 text-center text-xs font-medium text-gray-500">
+                            {day.slice(0, 2)}
+                          </DateRangePicker.HeadCell>
+                        {/each}
+                      </DateRangePicker.GridRow>
+                    </DateRangePicker.GridHead>
+
+                    <DateRangePicker.GridBody>
+                      {#each month.weeks as weekDates}
+                        <DateRangePicker.GridRow class="flex">
+                          {#each weekDates as date}
+                            <DateRangePicker.Cell
+                              {date}
+                              month={month.value}
+                              class="w-10 h-10 p-0"
+                            >
+                              <DateRangePicker.Day
+                                class="w-full h-full flex items-center justify-center rounded hover:bg-blue-50 text-sm
+                                       data-[selected]:bg-blue-600 data-[selected]:text-white
+                                       data-[selection-start]:bg-blue-600 data-[selection-start]:text-white
+                                       data-[selection-end]:bg-blue-600 data-[selection-end]:text-white
+                                       data-[highlighted]:bg-blue-100
+                                       data-[disabled]:text-gray-300 data-[disabled]:cursor-not-allowed
+                                       data-[outside-month]:text-gray-400"
+                              >
+                                {date.day}
+                              </DateRangePicker.Day>
+                            </DateRangePicker.Cell>
+                          {/each}
+                        </DateRangePicker.GridRow>
+                      {/each}
+                    </DateRangePicker.GridBody>
+                  </DateRangePicker.Grid>
+                {/each}
+              {/snippet}
+            </DateRangePicker.Calendar>
+          </DateRangePicker.Content>
+        </DateRangePicker.Root>
       </div>
     </div>
   </div>
