@@ -60,8 +60,8 @@
   const minValue = $derived(stringToCalendarDate(min));
   const maxValue = $derived(stringToCalendarDate(max));
 
-  // Default placeholder to today or min value
-  const placeholder = $derived(minValue || today(getLocalTimeZone()));
+  // Default placeholder to today (calendar opens to today's date)
+  const placeholder = $derived(today(getLocalTimeZone()));
 
   // Computed classes for error states
   const inputClasses = $derived(
