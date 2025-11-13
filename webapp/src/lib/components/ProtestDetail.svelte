@@ -81,7 +81,14 @@
     }
   }
 
-  onMount(loadProtest);
+  // Reactive effect to reload when the route parameter changes
+  $: if ($page.params.id) {
+    // Reset state before loading new data
+    loading = true;
+    referencedProtest = null;
+    corrections = [];
+    loadProtest();
+  }
 
   function formatDate(dateStr) {
     if (!dateStr) return '';
@@ -358,85 +365,64 @@
       </div>
     {/if}
 
-    <!-- Submission Type Info -->
-    {#if protest.submission_types && protest.submission_types.length > 0}
-      <div class="bg-white shadow rounded-lg p-6 mb-6">
-        <h2 class="text-xl font-semibold mb-4">Submission Information</h2>
-
-        <div class="mb-4">
-          <dt class="text-sm font-medium text-gray-500 mb-2">Submission Type</dt>
-          <dd class="flex flex-wrap gap-2">
-            {#each protest.submission_types as type}
-              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {type === 'data correction' ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'}">
-                {type}
-              </span>
-            {/each}
-          </dd>
-        </div>
-
-        <!-- If this is a data correction, show the original record -->
-        {#if referencedProtest}
-          <div class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <h3 class="text-sm font-semibold text-blue-900 mb-2">
-              This is a correction of:
+    <!-- Related Records -->
+    {#if referencedProtest}
+      <!-- If this is a data correction, show the original record -->
+      <a
+        href="/protest/{referencedProtest.id}"
+        class="block bg-blue-50 rounded-lg border-2 border-blue-200 p-6 mb-6 hover:bg-blue-100 hover:border-blue-300 transition-all"
+      >
+        <div class="flex items-start gap-3">
+          <svg class="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z" />
+          </svg>
+          <div class="flex-1">
+            <h3 class="text-sm font-semibold text-blue-900 mb-3">
+              This correction updates the following record:
             </h3>
-            <a
-              href="/protest/{referencedProtest.id}"
-              class="block hover:bg-blue-100 p-3 rounded transition-colors"
-            >
-              <div class="font-medium text-blue-900">{referencedProtest.title}</div>
-              <div class="text-sm text-blue-700 mt-1">
-                {formatDate(referencedProtest.date_of_event)} • {referencedProtest.locality}, {referencedProtest.state_code}
-              </div>
-              {#if referencedProtest.submission_types}
-                <div class="flex gap-1 mt-2">
-                  {#each referencedProtest.submission_types as type}
-                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {type === 'data correction' ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'}">
-                      {type}
-                    </span>
-                  {/each}
-                </div>
-              {/if}
-            </a>
-            <p class="text-xs text-blue-600 mt-2">
-              Click to view the original record
-            </p>
-          </div>
-        {/if}
-
-        <!-- If this is a new record, show any corrections -->
-        {#if corrections.length > 0}
-          <div class="mt-4 p-4 bg-amber-50 rounded-lg border border-amber-200">
-            <h3 class="text-sm font-semibold text-amber-900 mb-2">
-              {corrections.length === 1 ? 'This record has 1 correction:' : `This record has ${corrections.length} corrections:`}
-            </h3>
-            <div class="space-y-2">
-              {#each corrections as correction}
-                <a
-                  href="/protest/{correction.id}"
-                  class="block hover:bg-amber-100 p-3 rounded transition-colors"
-                >
-                  <div class="font-medium text-amber-900">{correction.title}</div>
-                  <div class="text-sm text-amber-700 mt-1">
-                    {formatDate(correction.date_of_event)} • {correction.locality}, {correction.state_code}
-                  </div>
-                  {#if correction.submission_types}
-                    <div class="flex gap-1 mt-2">
-                      {#each correction.submission_types as type}
-                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {type === 'data correction' ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'}">
-                          {type}
-                        </span>
-                      {/each}
-                    </div>
-                  {/if}
-                </a>
-              {/each}
+            <div class="font-medium text-blue-900 text-lg">{referencedProtest.title}</div>
+            <div class="text-sm text-blue-700 mt-2">
+              {formatDate(referencedProtest.date_of_event)} • {referencedProtest.locality}, {referencedProtest.state_code}
             </div>
-            <p class="text-xs text-amber-600 mt-2">
-              Click to view {corrections.length === 1 ? 'the correction' : 'a correction'}
-            </p>
+            <div class="flex items-center gap-2 mt-3 text-sm text-blue-600 font-medium">
+              <span>View original record</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
           </div>
-        {/if}
+        </div>
+      </a>
+    {/if}
+
+    {#if corrections.length > 0}
+      <!-- If this is a new record, show any corrections -->
+      <div class="bg-white shadow rounded-lg p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+          <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          {corrections.length === 1 ? 'This record has been corrected' : `This record has ${corrections.length} corrections`}
+        </h2>
+        <div class="space-y-3">
+          {#each corrections as correction}
+            <a
+              href="/protest/{correction.id}"
+              class="block p-4 bg-amber-50 rounded-lg border border-amber-200 hover:bg-amber-100 hover:border-amber-300 transition-all"
+            >
+              <div class="font-medium text-amber-900">{correction.title}</div>
+              <div class="text-sm text-amber-700 mt-1">
+                {formatDate(correction.date_of_event)} • {correction.locality}, {correction.state_code}
+              </div>
+              <div class="flex items-center gap-2 mt-2 text-sm text-amber-600 font-medium">
+                <span>View correction</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </a>
+          {/each}
+        </div>
       </div>
     {/if}
 
