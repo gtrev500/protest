@@ -41,7 +41,7 @@
         name={`${name}_details`}
         bind:value={detailsValue}
         placeholder={detailsPlaceholder}
-        class="flex-1 text-sm rounded-md border-gray-300"
+        class="flex-1 h-10 px-3 text-sm rounded-md border border-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
       />
     {/if}
   </div>

@@ -38,8 +38,8 @@
 
   // Computed class for error states
   const inputClasses = $derived(
-    `block w-full rounded-md pr-10 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
-      errors.state_code ? 'border-red-300' : 'border-gray-300'
+    `block w-full h-10 px-3 pr-10 rounded-md border focus:border-blue-500 focus:ring-1 focus:ring-blue-500 ${
+      errors.state_code ? 'border-red-400 focus:border-red-500 focus:ring-red-500' : 'border-gray-400'
     }`
   );
 </script>

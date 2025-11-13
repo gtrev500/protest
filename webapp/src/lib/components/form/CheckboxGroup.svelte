@@ -127,7 +127,7 @@
               name={`${name}_other`}
               bind:value={otherValue}
               bind:this={otherInputElement}
-              class="mt-1 block w-full text-sm rounded-md border-gray-300"
+              class="mt-1 block w-full h-10 px-3 text-sm rounded-md border border-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               placeholder={otherPlaceholder}
             />
           {/if}

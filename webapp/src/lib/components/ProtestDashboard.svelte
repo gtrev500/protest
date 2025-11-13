@@ -254,7 +254,7 @@
           bind:value={searchTerm}
           oninput={handleSearchInput}
           placeholder="Search protests..."
-          class="w-full rounded-md border-gray-300"
+          class="w-full h-10 px-3 rounded-md border border-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
         />
       </div>
 
@@ -275,7 +275,7 @@
               id="state-combobox"
               placeholder="Search states..."
               oninput={(e) => (searchValue = e.currentTarget.value)}
-              class="w-full rounded-md border-gray-300 pr-10 focus:ring-blue-500 focus:border-blue-500"
+              class="w-full h-10 px-3 pr-10 rounded-md border border-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               aria-label="Search states"
             />
 
@@ -363,7 +363,7 @@
               id="submission-type-combobox"
               placeholder="All types..."
               oninput={(e) => (submissionTypeSearchValue = e.currentTarget.value)}
-              class="w-full rounded-md border-gray-300 pr-10 focus:ring-blue-500 focus:border-blue-500"
+              class="w-full h-10 px-3 pr-10 rounded-md border border-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               aria-label="Search submission types"
             />
 
