@@ -4,6 +4,7 @@
   import { supabase } from '$lib/supabase';
   import { Tooltip, DateRangePicker, Combobox, type DateRange } from 'bits-ui';
   import { CalendarDate } from '@internationalized/date';
+  import { capitalize } from '$lib/utils/string';
 
   let { showMetrics = false } = $props();
 
@@ -22,7 +23,6 @@
   let searchDebounceTimer: number | undefined;
   let showSearchHelp = $state(false);
   let searchValue = $state('');
-  let submissionTypeSearchValue = $state('');
 
   // Derived values for date range (convert CalendarDate to string for API)
   let startDate = $derived(
@@ -97,15 +97,6 @@
     const { data } = await supabase.from('submission_types').select('*').order('id');
     submissionTypes = data || [];
   }
-
-  // Filter submission types based on search input for Combobox
-  const filteredSubmissionTypes = $derived(
-    submissionTypeSearchValue === ''
-      ? submissionTypes
-      : submissionTypes.filter((type) =>
-          type.name.toLowerCase().includes(submissionTypeSearchValue.toLowerCase())
-        )
-  );
 
   // Watch for date range changes and trigger filter
   $effect(() => {
@@ -347,91 +338,20 @@
       </div>
 
       <div>
-        <label for="submission-type-combobox" class="block text-sm font-medium text-gray-700 mb-1">
+        <label for="submission-type" class="block text-sm font-medium text-gray-700 mb-1">
           Submission Type
         </label>
-        <Combobox.Root
-          type="single"
+        <select
+          id="submission-type"
           bind:value={selectedSubmissionType}
-          onOpenChange={(isOpen) => {
-            if (!isOpen) submissionTypeSearchValue = '';
-            if (!isOpen && selectedSubmissionType !== '') handleFilterChange();
-          }}
+          onchange={handleFilterChange}
+          class="w-full h-10 px-3 rounded-md border border-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
         >
-          <div class="relative">
-            <Combobox.Input
-              id="submission-type-combobox"
-              placeholder="All types..."
-              oninput={(e) => (submissionTypeSearchValue = e.currentTarget.value)}
-              class="w-full h-10 px-3 pr-10 rounded-md border border-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              aria-label="Search submission types"
-            />
-
-            <Combobox.Trigger
-              class="absolute right-0 top-0 h-full px-3 flex items-center text-gray-400 hover:text-gray-600"
-              aria-label="Toggle submission type dropdown"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-              </svg>
-            </Combobox.Trigger>
-          </div>
-
-          <Combobox.Portal>
-            <Combobox.Content
-              class="bg-white border border-gray-200 rounded-md shadow-lg mt-1 z-50 max-h-60 overflow-hidden"
-              sideOffset={4}
-            >
-              <Combobox.Viewport class="p-1">
-                <Combobox.Item
-                  value=""
-                  label="All Types"
-                  class="px-3 py-2 text-sm cursor-pointer rounded hover:bg-blue-50 focus:bg-blue-50 focus:outline-none data-[highlighted]:bg-blue-100 data-[selected]:bg-blue-600 data-[selected]:text-white"
-                >
-                  {#snippet children({ selected })}
-                    <div class="flex items-center justify-between">
-                      <span>All Types</span>
-                      {#if selected}
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                        </svg>
-                      {/if}
-                    </div>
-                  {/snippet}
-                </Combobox.Item>
-
-                {#each filteredSubmissionTypes as type}
-                  <Combobox.Item
-                    value={String(type.id)}
-                    label={type.name}
-                    class="px-3 py-2 text-sm cursor-pointer rounded hover:bg-blue-50 focus:bg-blue-50 focus:outline-none data-[highlighted]:bg-blue-100 data-[selected]:bg-blue-600 data-[selected]:text-white"
-                  >
-                    {#snippet children({ selected })}
-                      <div class="flex items-center justify-between">
-                        <span>{type.name}</span>
-                        {#if selected}
-                          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                          </svg>
-                        {/if}
-                      </div>
-                    {/snippet}
-                  </Combobox.Item>
-                {:else}
-                  <div class="px-3 py-2 text-sm text-gray-500 text-center">
-                    No types found
-                  </div>
-                {/each}
-              </Combobox.Viewport>
-
-              <Combobox.ScrollDownButton class="flex justify-center py-1">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                </svg>
-              </Combobox.ScrollDownButton>
-            </Combobox.Content>
-          </Combobox.Portal>
-        </Combobox.Root>
+          <option value="">All Types</option>
+          {#each submissionTypes as type}
+            <option value={String(type.id)}>{capitalize(type.name)}</option>
+          {/each}
+        </select>
       </div>
 
       <div class="md:col-span-2">
