@@ -25,6 +25,10 @@
   let showSearchHelp = $state(false);
   let searchValue = $state('');
 
+  // View mode state
+  let viewMode = $state<'table' | 'card' | 'auto'>('auto');
+  let isDesktop = $state(false);
+
   // Derived values for dates (convert CalendarDate to string for API)
   let startDate = $derived(
     startDateValue
@@ -36,6 +40,11 @@
     endDateValue
       ? `${endDateValue.year}-${String(endDateValue.month).padStart(2, '0')}-${String(endDateValue.day).padStart(2, '0')}`
       : ''
+  );
+
+  // Determine current view based on mode and screen size
+  let currentView = $derived<'table' | 'card'>(
+    viewMode === 'auto' ? (isDesktop ? 'table' : 'card') : viewMode
   );
 
   async function loadProtests() {
@@ -136,8 +145,18 @@
     loadSubmissionTypes();
     loadProtests();
 
+    // Detect initial screen size
+    const checkScreenSize = () => {
+      isDesktop = window.innerWidth >= 1024;
+    };
+    checkScreenSize();
+
+    // Listen for resize events
+    window.addEventListener('resize', checkScreenSize);
+
     return () => {
       clearTimeout(searchDebounceTimer);
+      window.removeEventListener('resize', checkScreenSize);
     };
   });
 
@@ -279,6 +298,106 @@
       {/snippet}
     </DatePicker.Calendar>
   </DatePicker.Content>
+{/snippet}
+
+{#snippet protestCard(protest: any)}
+  <div class="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-6 flex flex-col gap-4">
+    <!-- Date badges -->
+    <div class="flex gap-2 text-xs text-gray-600">
+      <div class="flex items-center gap-1">
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        <span>{formatDate(protest.date_of_event)}</span>
+      </div>
+      <span class="text-gray-300">•</span>
+      <div class="flex items-center gap-1">
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span>Submitted {formatDate(protest.created_at)}</span>
+      </div>
+    </div>
+
+    <!-- Title -->
+    <a href="/protest/{protest.id}" class="group">
+      <h3 class="font-semibold text-lg text-gray-900 group-hover:text-blue-600 transition-colors">
+        {protest.title}
+      </h3>
+      {#if protest.organization_name}
+        <p class="text-sm text-gray-600 mt-1">{protest.organization_name}</p>
+      {/if}
+    </a>
+
+    <!-- Location -->
+    <div class="flex items-start gap-2 text-sm text-gray-700">
+      <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+      <span>{protest.locality}, {protest.state_code}</span>
+    </div>
+
+    <!-- Participants -->
+    <div class="flex items-start gap-2 text-sm text-gray-700">
+      <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+      </svg>
+      <span>
+        {#if protest.crowd_size_low || protest.crowd_size_high}
+          {formatNumber(protest.crowd_size_low)} - {formatNumber(protest.crowd_size_high)} participants
+        {:else}
+          <span class="text-gray-400">Participants not reported</span>
+        {/if}
+      </span>
+    </div>
+
+    <!-- Event Types -->
+    {#if protest.event_types && protest.event_types.length > 0}
+      <div>
+        <div class="text-xs font-medium text-gray-500 mb-2">Event Types:</div>
+        <div class="flex flex-wrap gap-1">
+          {#each protest.event_types.slice(0, 5) as type}
+            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
+              {type}
+            </span>
+          {/each}
+          {#if protest.event_types.length > 5}
+            <span class="text-xs text-gray-500 px-2 py-1">
+              +{protest.event_types.length - 5} more
+            </span>
+          {/if}
+        </div>
+      </div>
+    {/if}
+
+    <!-- Submission Type -->
+    {#if protest.submission_types && protest.submission_types.length > 0}
+      <div>
+        <div class="text-xs font-medium text-gray-500 mb-2">Submission Type:</div>
+        <div class="flex flex-wrap gap-1">
+          {#each protest.submission_types as type}
+            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium {type === 'data correction' ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'}">
+              {type}
+            </span>
+          {/each}
+        </div>
+      </div>
+    {/if}
+
+    <!-- View Details Button -->
+    <div class="mt-auto pt-4 border-t border-gray-100">
+      <a
+        href="/protest/{protest.id}"
+        class="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
+      >
+        View Details
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </a>
+    </div>
+  </div>
 {/snippet}
 
 <div class="max-w-7xl mx-auto p-6">
@@ -487,18 +606,89 @@
     </div>
   </div>
 
-  <!-- Protests Table -->
-  <div class="bg-white rounded-lg shadow overflow-hidden">
-    {#if loading}
-      <div class="p-8 text-center">
-        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <p class="mt-2 text-gray-500">Loading protests...</p>
-      </div>
-    {:else if protests.length === 0}
-      <div class="p-8 text-center text-gray-500">
-        No protests found matching your criteria.
+  <!-- View Toggle -->
+  <div class="flex justify-between items-center mb-4 gap-2">
+    <!-- Sort dropdown for card view -->
+    {#if currentView === 'card'}
+      <div class="flex items-center gap-2">
+        <label for="card-sort" class="text-sm font-medium text-gray-700">Sort by:</label>
+        <select
+          id="card-sort"
+          bind:value={sortField}
+          onchange={() => { sortOrder = 'desc'; handleSortChange(); }}
+          class="h-10 px-3 pr-8 rounded-md border border-gray-300 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm"
+        >
+          <option value="date_of_event">Event Date</option>
+          <option value="created_at">Submitted Date</option>
+        </select>
+        <button
+          onclick={() => { sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'; handleSortChange(); }}
+          class="px-3 py-2 rounded-md border border-gray-300 bg-white hover:bg-gray-50 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+          aria-label="Toggle sort order"
+        >
+          <svg class="w-4 h-4 {sortOrder === 'asc' ? 'rotate-180' : ''} transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
       </div>
     {:else}
+      <div></div>
+    {/if}
+
+    <div class="flex items-center gap-1 bg-white rounded-lg shadow p-1">
+      <button
+        onclick={() => viewMode = 'table'}
+        class="px-3 py-2 rounded flex items-center gap-2 text-sm font-medium transition-colors {viewMode === 'table' ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}"
+        aria-label="Table view"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+        </svg>
+        <span class="hidden sm:inline">Table</span>
+      </button>
+      <button
+        onclick={() => viewMode = 'card'}
+        class="px-3 py-2 rounded flex items-center gap-2 text-sm font-medium transition-colors {viewMode === 'card' ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}"
+        aria-label="Card view"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+        </svg>
+        <span class="hidden sm:inline">Cards</span>
+      </button>
+      <button
+        onclick={() => viewMode = 'auto'}
+        class="px-3 py-2 rounded flex items-center gap-2 text-sm font-medium transition-colors {viewMode === 'auto' ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}"
+        aria-label="Auto responsive view"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+        </svg>
+        <span class="hidden sm:inline">Auto</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Protests Content -->
+  {#if loading}
+    <div class="bg-white rounded-lg shadow p-8 text-center">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <p class="mt-2 text-gray-500">Loading protests...</p>
+    </div>
+  {:else if protests.length === 0}
+    <div class="bg-white rounded-lg shadow p-8 text-center text-gray-500">
+      No protests found matching your criteria.
+    </div>
+  {:else if currentView === 'card'}
+    <!-- Card View -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+      {#each protests as protest}
+        {@render protestCard(protest)}
+      {/each}
+    </div>
+  {:else}
+    <!-- Table View -->
+    <div class="bg-white rounded-lg shadow overflow-hidden">
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
@@ -610,9 +800,12 @@
           </tbody>
         </table>
       </div>
+    </div>
+  {/if}
 
-      <!-- Pagination -->
-      <div class="bg-gray-50 px-4 py-3 flex items-center justify-between sm:px-6">
+  <!-- Pagination -->
+  {#if !loading && protests.length > 0}
+    <div class="bg-white rounded-lg shadow px-4 py-3 flex items-center justify-between sm:px-6">
         <div class="flex-1 flex justify-between sm:hidden">
           <button
             onclick={() => { page--; loadProtests(); }}
@@ -673,9 +866,8 @@
             </nav>
           </div>
         </div>
-      </div>
-    {/if}
-  </div>
+    </div>
+  {/if}
 </div>
 
 <style>
