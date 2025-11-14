@@ -681,25 +681,24 @@
   <div class="flex justify-between items-center mb-4 gap-4">
     <!-- Sort dropdown -->
     <div class="flex items-center gap-2">
-      <label for="sort-field" class="text-sm font-medium text-gray-700">Sort by:</label>
+      <label for="sort-select" class="text-sm font-medium text-gray-700">Sort by:</label>
       <select
-        id="sort-field"
-        bind:value={sortField}
-        onchange={() => { sortOrder = 'desc'; handleSortChange(); }}
+        id="sort-select"
+        onchange={(e) => {
+          const value = e.currentTarget.value;
+          const [field, order] = value.split('_');
+          sortField = field === 'event' ? 'date_of_event' : 'created_at';
+          sortOrder = order as 'asc' | 'desc';
+          handleSortChange();
+        }}
+        value={`${sortField === 'date_of_event' ? 'event' : 'submitted'}_${sortOrder}`}
         class="h-10 px-3 pr-8 rounded-md border border-gray-300 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm"
       >
-        <option value="date_of_event">Event Date</option>
-        <option value="created_at">Submitted Date</option>
+        <option value="event_desc">Event Date (Newest First)</option>
+        <option value="event_asc">Event Date (Oldest First)</option>
+        <option value="submitted_desc">Submitted Date (Newest First)</option>
+        <option value="submitted_asc">Submitted Date (Oldest First)</option>
       </select>
-      <button
-        onclick={() => { sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'; handleSortChange(); }}
-        class="px-3 py-2 rounded-md border border-gray-300 bg-white hover:bg-gray-50 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
-        aria-label="Toggle sort order"
-      >
-        <svg class="w-4 h-4 {sortOrder === 'asc' ? 'rotate-180' : ''} transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
     </div>
 
     <div class="flex items-center gap-0" role="group" aria-label="View mode">
