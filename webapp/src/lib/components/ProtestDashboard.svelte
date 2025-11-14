@@ -702,13 +702,13 @@
       </button>
     </div>
 
-    <div class="flex items-center gap-1 bg-white rounded-lg shadow p-1" role="group" aria-label="View mode">
+    <div class="flex items-center gap-0" role="group" aria-label="View mode">
       <button
         onclick={() => {
           isManualSelection = true;
           viewMode = 'table';
         }}
-        class="px-3 py-2 rounded flex items-center gap-2 text-sm font-medium transition-colors {viewMode === 'table' ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}"
+        class="h-10 px-3 flex items-center gap-2 text-sm font-medium rounded-l-md border border-gray-300 transition-colors {viewMode === 'table' ? 'bg-blue-50 border-blue-500 text-blue-700 z-10' : 'bg-white text-gray-700 hover:bg-gray-50'}"
         aria-label="Table view"
         aria-pressed={viewMode === 'table'}
       >
@@ -722,7 +722,7 @@
           isManualSelection = true;
           viewMode = 'card';
         }}
-        class="px-3 py-2 rounded flex items-center gap-2 text-sm font-medium transition-colors {viewMode === 'card' ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}"
+        class="h-10 px-3 flex items-center gap-2 text-sm font-medium rounded-r-md border border-l-0 border-gray-300 transition-colors {viewMode === 'card' ? 'bg-blue-50 border-blue-500 text-blue-700 z-10' : 'bg-white text-gray-700 hover:bg-gray-50'}"
         aria-label="Card view"
         aria-pressed={viewMode === 'card'}
       >
