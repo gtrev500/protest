@@ -26,7 +26,8 @@
   let searchValue = $state('');
 
   // View mode state
-  let viewMode = $state<'table' | 'card' | 'auto'>('auto');
+  let viewMode = $state<'table' | 'card'>('table');
+  let isManualSelection = $state(false);
   let isDesktop = $state(false);
 
   // Derived values for dates (convert CalendarDate to string for API)
@@ -40,11 +41,6 @@
     endDateValue
       ? `${endDateValue.year}-${String(endDateValue.month).padStart(2, '0')}-${String(endDateValue.day).padStart(2, '0')}`
       : ''
-  );
-
-  // Determine current view based on mode and screen size
-  let currentView = $derived<'table' | 'card'>(
-    viewMode === 'auto' ? (isDesktop ? 'table' : 'card') : viewMode
   );
 
   async function loadProtests() {
@@ -141,14 +137,10 @@
   });
 
   onMount(() => {
-    // Load preferences from localStorage
-    const savedViewMode = localStorage.getItem('protestDashboard_viewMode');
+    // Load sort preferences from localStorage
     const savedSortField = localStorage.getItem('protestDashboard_sortField');
     const savedSortOrder = localStorage.getItem('protestDashboard_sortOrder');
 
-    if (savedViewMode && ['table', 'card', 'auto'].includes(savedViewMode)) {
-      viewMode = savedViewMode as 'table' | 'card' | 'auto';
-    }
     if (savedSortField) {
       sortField = savedSortField;
     }
@@ -160,9 +152,14 @@
     loadSubmissionTypes();
     loadProtests();
 
-    // Detect initial screen size
+    // Detect initial screen size and set view automatically
     const checkScreenSize = () => {
       isDesktop = window.innerWidth >= 1024;
+
+      // Only auto-adjust if user hasn't made a manual selection this session
+      if (!isManualSelection) {
+        viewMode = isDesktop ? 'table' : 'card';
+      }
     };
     checkScreenSize();
 
@@ -173,12 +170,6 @@
       clearTimeout(searchDebounceTimer);
       window.removeEventListener('resize', checkScreenSize);
     };
-  });
-
-  // Save preferences to localStorage when they change
-  $effect(() => {
-    const mode = viewMode;
-    localStorage.setItem('protestDashboard_viewMode', mode);
   });
 
   $effect(() => {
@@ -708,7 +699,7 @@
   <!-- View Toggle -->
   <div class="flex justify-between items-center mb-4 gap-4">
     <!-- Sort dropdown for card view -->
-    {#if currentView === 'card'}
+    {#if viewMode === 'card'}
       <div class="flex items-center gap-2">
         <label for="card-sort" class="text-sm font-medium text-gray-700">Sort by:</label>
         <select
@@ -736,7 +727,10 @@
 
     <div class="flex items-center gap-1 bg-white rounded-lg shadow p-1" role="group" aria-label="View mode">
       <button
-        onclick={() => viewMode = 'table'}
+        onclick={() => {
+          isManualSelection = true;
+          viewMode = 'table';
+        }}
         class="px-3 py-2 rounded flex items-center gap-2 text-sm font-medium transition-colors {viewMode === 'table' ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}"
         aria-label="Table view"
         aria-pressed={viewMode === 'table'}
@@ -747,7 +741,10 @@
         <span class="hidden sm:inline">Table</span>
       </button>
       <button
-        onclick={() => viewMode = 'card'}
+        onclick={() => {
+          isManualSelection = true;
+          viewMode = 'card';
+        }}
         class="px-3 py-2 rounded flex items-center gap-2 text-sm font-medium transition-colors {viewMode === 'card' ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}"
         aria-label="Card view"
         aria-pressed={viewMode === 'card'}
@@ -756,17 +753,6 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
         </svg>
         <span class="hidden sm:inline">Cards</span>
-      </button>
-      <button
-        onclick={() => viewMode = 'auto'}
-        class="px-3 py-2 rounded flex items-center gap-2 text-sm font-medium transition-colors {viewMode === 'auto' ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}"
-        aria-label="Auto responsive view"
-        aria-pressed={viewMode === 'auto'}
-      >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-        </svg>
-        <span class="hidden sm:inline">Auto</span>
       </button>
     </div>
   </div>
@@ -781,7 +767,7 @@
     <div class="bg-white rounded-lg shadow p-8 text-center text-gray-500">
       No protests found matching your criteria.
     </div>
-  {:else if currentView === 'card'}
+  {:else if viewMode === 'card'}
     <!-- Card View -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
       {#each protests as protest}
