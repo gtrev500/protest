@@ -678,7 +678,7 @@
   {/if}
 
   <!-- View Toggle -->
-  <div class="flex justify-between items-center mb-4 gap-4">
+  <div class="flex flex-wrap justify-between items-center mb-4 gap-4">
     <!-- Sort dropdown -->
     <div class="flex items-center gap-2">
       <label for="sort-select" class="text-sm font-medium text-gray-700">Sort by:</label>
