@@ -2,8 +2,8 @@
 <script lang="ts">
   import { onMount, untrack } from 'svelte';
   import { supabase } from '$lib/supabase';
-  import { Tooltip, DateRangePicker, Combobox, type DateRange } from 'bits-ui';
-  import { CalendarDate } from '@internationalized/date';
+  import { Tooltip, DatePicker, Combobox } from 'bits-ui';
+  import type { DateValue } from '@internationalized/date';
   import { capitalize } from '$lib/utils/string';
 
   let { showMetrics = false } = $props();
@@ -14,7 +14,8 @@
   let searchTerm = $state('');
   let selectedState = $state('');
   let selectedSubmissionType = $state<string>('');
-  let dateRange = $state<DateRange | undefined>(undefined);
+  let startDateValue = $state<DateValue | undefined>(undefined);
+  let endDateValue = $state<DateValue | undefined>(undefined);
   let page = $state(1);
   let pageSize = 20;
   let totalCount = $state(0);
@@ -24,16 +25,16 @@
   let showSearchHelp = $state(false);
   let searchValue = $state('');
 
-  // Derived values for date range (convert CalendarDate to string for API)
+  // Derived values for dates (convert CalendarDate to string for API)
   let startDate = $derived(
-    dateRange?.start
-      ? `${dateRange.start.year}-${String(dateRange.start.month).padStart(2, '0')}-${String(dateRange.start.day).padStart(2, '0')}`
+    startDateValue
+      ? `${startDateValue.year}-${String(startDateValue.month).padStart(2, '0')}-${String(startDateValue.day).padStart(2, '0')}`
       : ''
   );
 
   let endDate = $derived(
-    dateRange?.end
-      ? `${dateRange.end.year}-${String(dateRange.end.month).padStart(2, '0')}-${String(dateRange.end.day).padStart(2, '0')}`
+    endDateValue
+      ? `${endDateValue.year}-${String(endDateValue.month).padStart(2, '0')}-${String(endDateValue.day).padStart(2, '0')}`
       : ''
   );
 
@@ -98,9 +99,14 @@
     submissionTypes = data || [];
   }
 
-  // Watch for date range changes and trigger filter
+  // Watch for date changes and trigger filter
   $effect(() => {
-    if (dateRange !== undefined) {
+    // Track both date values
+    const start = startDateValue;
+    const end = endDateValue;
+
+    // Only trigger if at least one date is set (skip initial undefined state)
+    if (start !== undefined || end !== undefined) {
       // Use untrack to prevent this effect from tracking searchTerm and other dependencies
       untrack(() => handleFilterChange());
     }
@@ -186,6 +192,95 @@
   }
 </script>
 
+{#snippet datePickerInput(label: string)}
+  <div class="flex gap-2 items-center h-10 border border-gray-400 rounded-md px-3 bg-white hover:border-gray-400 focus-within:ring-1 focus-within:ring-blue-500 focus-within:border-blue-500">
+    <DatePicker.Input class="flex items-center flex-1 min-w-0">
+      {#snippet children({ segments })}
+        <div class="flex items-center gap-0.5">
+          {#each segments as { part, value }}
+            <DatePicker.Segment
+              {part}
+              class="px-0.5 rounded focus:bg-blue-100 focus:outline-none tabular-nums text-sm"
+            >
+              {value}
+            </DatePicker.Segment>
+          {/each}
+        </div>
+      {/snippet}
+    </DatePicker.Input>
+
+    <DatePicker.Trigger
+      class="text-gray-400 hover:text-gray-600 focus:outline-none flex-shrink-0"
+      aria-label="Open {label.toLowerCase()} picker"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      </svg>
+    </DatePicker.Trigger>
+  </div>
+
+  <DatePicker.Content
+    side="bottom"
+    sideOffset={8}
+    class="bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50"
+  >
+    <DatePicker.Calendar class="flex flex-col gap-4">
+      {#snippet children({ months, weekdays })}
+        <DatePicker.Header class="flex items-center justify-between mb-2">
+          <DatePicker.PrevButton class="p-2 hover:bg-gray-100 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+            </svg>
+          </DatePicker.PrevButton>
+          <DatePicker.Heading class="font-semibold text-gray-900" />
+          <DatePicker.NextButton class="p-2 hover:bg-gray-100 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+            </svg>
+          </DatePicker.NextButton>
+        </DatePicker.Header>
+
+        {#each months as month}
+          <DatePicker.Grid class="border-collapse">
+            <DatePicker.GridHead>
+              <DatePicker.GridRow class="flex mb-1">
+                {#each weekdays as day}
+                  <DatePicker.HeadCell class="w-10 text-center text-xs font-medium text-gray-500">
+                    {day.slice(0, 2)}
+                  </DatePicker.HeadCell>
+                {/each}
+              </DatePicker.GridRow>
+            </DatePicker.GridHead>
+
+            <DatePicker.GridBody>
+              {#each month.weeks as weekDates}
+                <DatePicker.GridRow class="flex">
+                  {#each weekDates as date}
+                    <DatePicker.Cell
+                      {date}
+                      month={month.value}
+                      class="w-10 h-10 p-0"
+                    >
+                      <DatePicker.Day
+                        class="w-full h-full flex items-center justify-center rounded hover:bg-blue-50 text-sm
+                               data-[selected]:bg-blue-600 data-[selected]:text-white
+                               data-[disabled]:text-gray-300 data-[disabled]:cursor-not-allowed
+                               data-[outside-month]:text-gray-400"
+                      >
+                        {date.day}
+                      </DatePicker.Day>
+                    </DatePicker.Cell>
+                  {/each}
+                </DatePicker.GridRow>
+              {/each}
+            </DatePicker.GridBody>
+          </DatePicker.Grid>
+        {/each}
+      {/snippet}
+    </DatePicker.Calendar>
+  </DatePicker.Content>
+{/snippet}
+
 <div class="max-w-7xl mx-auto p-6">
   <h1 class="text-3xl font-bold mb-8">WeCountProject Form Submission Log</h1>
 
@@ -218,7 +313,7 @@
   <div class="bg-white rounded-lg shadow p-6 mb-6">
     <h2 class="text-lg font-semibold mb-4">Filters</h2>
 
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
       <div>
         <label for="search" class="block text-sm font-medium text-gray-700 mb-1">
           Search
@@ -364,111 +459,30 @@
         </select>
       </div>
 
-      <div class="md:col-span-2">
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          Date Range
+      <div>
+        <label for="start-date" class="block text-sm font-medium text-gray-700 mb-1">
+          Start Date
         </label>
 
-        <DateRangePicker.Root
-          bind:value={dateRange}
+        <DatePicker.Root
+          bind:value={startDateValue}
           weekdayFormat="short"
-          class="flex flex-col gap-1.5"
         >
-          <div class="flex gap-2 items-center border border-gray-300 rounded-md px-3 py-2 bg-white hover:border-gray-400 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent">
-            {#each ["start", "end"] as type}
-              <DateRangePicker.Input type={type as "start" | "end"} class="flex items-center">
-                {#snippet children({ segments })}
-                  <div class="flex items-center gap-0.5">
-                    {#each segments as { part, value }}
-                      <DateRangePicker.Segment
-                        {part}
-                        class="px-0.5 rounded focus:bg-blue-100 focus:outline-none tabular-nums text-sm"
-                      >
-                        {value}
-                      </DateRangePicker.Segment>
-                    {/each}
-                  </div>
-                {/snippet}
-              </DateRangePicker.Input>
-              {#if type === "start"}
-                <span class="text-gray-400">→</span>
-              {/if}
-            {/each}
+          {@render datePickerInput("Start Date")}
+        </DatePicker.Root>
+      </div>
 
-            <DateRangePicker.Trigger
-              class="ml-auto text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded p-1"
-              aria-label="Open date picker"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-            </DateRangePicker.Trigger>
-          </div>
+      <div>
+        <label for="end-date" class="block text-sm font-medium text-gray-700 mb-1">
+          End Date
+        </label>
 
-          <DateRangePicker.Content
-            side="bottom"
-            sideOffset={8}
-            class="bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50"
-          >
-            <DateRangePicker.Calendar class="flex flex-col gap-4">
-              {#snippet children({ months, weekdays })}
-                <DateRangePicker.Header class="flex items-center justify-between mb-2">
-                  <DateRangePicker.PrevButton class="p-2 hover:bg-gray-100 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
-                    </svg>
-                  </DateRangePicker.PrevButton>
-                  <DateRangePicker.Heading class="font-semibold text-gray-900" />
-                  <DateRangePicker.NextButton class="p-2 hover:bg-gray-100 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-                    </svg>
-                  </DateRangePicker.NextButton>
-                </DateRangePicker.Header>
-
-                {#each months as month}
-                  <DateRangePicker.Grid class="border-collapse">
-                    <DateRangePicker.GridHead>
-                      <DateRangePicker.GridRow class="flex mb-1">
-                        {#each weekdays as day}
-                          <DateRangePicker.HeadCell class="w-10 text-center text-xs font-medium text-gray-500">
-                            {day.slice(0, 2)}
-                          </DateRangePicker.HeadCell>
-                        {/each}
-                      </DateRangePicker.GridRow>
-                    </DateRangePicker.GridHead>
-
-                    <DateRangePicker.GridBody>
-                      {#each month.weeks as weekDates}
-                        <DateRangePicker.GridRow class="flex">
-                          {#each weekDates as date}
-                            <DateRangePicker.Cell
-                              {date}
-                              month={month.value}
-                              class="w-10 h-10 p-0"
-                            >
-                              <DateRangePicker.Day
-                                class="w-full h-full flex items-center justify-center rounded hover:bg-blue-50 text-sm
-                                       data-[selected]:bg-blue-600 data-[selected]:text-white
-                                       data-[selection-start]:bg-blue-600 data-[selection-start]:text-white
-                                       data-[selection-end]:bg-blue-600 data-[selection-end]:text-white
-                                       data-[highlighted]:bg-blue-100
-                                       data-[disabled]:text-gray-300 data-[disabled]:cursor-not-allowed
-                                       data-[outside-month]:text-gray-400"
-                              >
-                                {date.day}
-                              </DateRangePicker.Day>
-                            </DateRangePicker.Cell>
-                          {/each}
-                        </DateRangePicker.GridRow>
-                      {/each}
-                    </DateRangePicker.GridBody>
-                  </DateRangePicker.Grid>
-                {/each}
-              {/snippet}
-            </DateRangePicker.Calendar>
-          </DateRangePicker.Content>
-        </DateRangePicker.Root>
+        <DatePicker.Root
+          bind:value={endDateValue}
+          weekdayFormat="short"
+        >
+          {@render datePickerInput("End Date")}
+        </DatePicker.Root>
       </div>
     </div>
   </div>
