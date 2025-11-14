@@ -323,7 +323,7 @@
           {#if formatDate(protest.date_of_event)}
             <span class="font-medium text-gray-700">{formatDate(protest.date_of_event)}</span>
           {:else}
-            <span class="text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded text-[11px] font-medium">Date TBD</span>
+            <span class="text-gray-400 text-xs">Invalid Date</span>
           {/if}
         </div>
         <div class="flex items-center gap-1.5 text-[11px]">
