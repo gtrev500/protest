@@ -5,7 +5,7 @@
 {#snippet actionButton(href, isPrimary, text)}
 	<a
 		href={href}
-		class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md {isPrimary ? 'text-white bg-blue-600 hover:bg-blue-700' : 'text-blue-600 bg-white hover:bg-gray-50'} md:py-4 md:text-lg md:px-10"
+		class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md {isPrimary ? 'text-white bg-brand-600 hover:bg-brand-700' : 'text-brand-600 bg-white hover:bg-gray-50'} md:py-4 md:text-lg md:px-10"
 	>
 		{text}
 	</a>
@@ -16,7 +16,7 @@
 		<div class="px-4 py-5 sm:p-6">
 			<div class="flex items-center">
 				<div class="flex-shrink-0">
-					<svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<svg class="h-8 w-8 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={iconPath} />
 					</svg>
 				</div>

@@ -47,7 +47,7 @@
       <div class="mt-8 space-y-3">
         <a
           href="/form"
-          class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+          class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-brand-600 hover:bg-brand-700"
         >
           Submit Another Protest
         </a>

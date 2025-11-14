@@ -62,7 +62,7 @@
             name="submission_type"
             value={type.id.toString()}
             bind:group={value}
-            class="mt-1 text-blue-600 focus:ring-blue-500 border-gray-300"
+            class="mt-1 text-brand-600 focus:ring-brand-500 border-gray-300"
             required
           />
           <div class="ml-2 flex-1">
@@ -93,7 +93,7 @@
   </div>
 
   {#if errors?.submission_type}
-    <p class="mt-1 text-sm text-red-600">
+    <p class="mt-1 text-sm text-danger-600">
       {Array.isArray(errors.submission_type) ? errors.submission_type[0] : errors.submission_type}
     </p>
   {/if}

@@ -111,21 +111,21 @@
 <div class="max-w-4xl mx-auto p-6">
   {#if loading}
     <div class="text-center py-12">
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div>
       <p class="mt-1 text-gray-500">Loading protest details...</p>
     </div>
   {:else if !protest}
     <div class="text-center py-12">
       <h2 class="text-2xl font-bold text-gray-900">Protest not found</h2>
       <p class="mt-1 text-gray-500">The protest you're looking for doesn't exist.</p>
-      <a href="/log" class="mt-4 inline-block text-blue-600 hover:text-blue-900">
+      <a href="/log" class="mt-4 inline-block text-brand-600 hover:text-brand-900">
         ← Back to Log
       </a>
     </div>
   {:else}
     <!-- Header -->
     <div class="mb-6">
-      <a href="/log" class="text-blue-600 hover:text-blue-900 mb-4 inline-block">
+      <a href="/log" class="text-brand-600 hover:text-brand-900 mb-4 inline-block">
         ← Back to Log
       </a>
       <h1 class="text-3xl font-bold text-gray-900">{protest.title}</h1>
@@ -189,7 +189,7 @@
         <h2 class="text-xl font-semibold mb-4">Event Types</h2>
         <div class="flex flex-wrap gap-2">
           {#each protest.event_types as type}
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-brand-100 text-brand-800">
               {type}
             </span>
           {/each}
@@ -272,7 +272,7 @@
             <dt class="text-sm font-medium text-gray-500 mb-2">Police Response</dt>
             <dd class="flex flex-wrap gap-2">
               {#each protest.police_measures_list as measure}
-                <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-red-100 text-red-800">
+                <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-danger-100 text-danger-800">
                   {measure}
                 </span>
               {/each}
@@ -291,7 +291,7 @@
           <dt class="text-sm font-medium text-gray-500">Participant Injuries</dt>
           <dd class="mt-1">
             <span class={`inline-flex px-2 py-1 text-xs rounded-full ${
-              protest.participant_injury === 'yes' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+              protest.participant_injury === 'yes' ? 'bg-danger-100 text-danger-800' : 'bg-green-100 text-green-800'
             }`}>
               {protest.participant_injury === 'yes' ? 'Yes' : 'No'}
             </span>
@@ -305,7 +305,7 @@
           <dt class="text-sm font-medium text-gray-500">Police Injuries</dt>
           <dd class="mt-1">
             <span class={`inline-flex px-2 py-1 text-xs rounded-full ${
-              protest.police_injury === 'yes' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+              protest.police_injury === 'yes' ? 'bg-danger-100 text-danger-800' : 'bg-green-100 text-green-800'
             }`}>
               {protest.police_injury === 'yes' ? 'Yes' : 'No'}
             </span>
@@ -370,21 +370,21 @@
       <!-- If this is a data correction, show the original record -->
       <a
         href="/protest/{referencedProtest.id}"
-        class="block bg-blue-50 rounded-lg border-2 border-blue-200 p-6 mb-6 hover:bg-blue-100 hover:border-blue-300 transition-all"
+        class="block bg-brand-50 rounded-lg border-2 border-brand-200 p-6 mb-6 hover:bg-brand-100 hover:border-brand-300 transition-all"
       >
         <div class="flex items-start gap-3">
-          <svg class="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-6 h-6 text-brand-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z" />
           </svg>
           <div class="flex-1">
-            <h3 class="text-sm font-semibold text-blue-900 mb-3">
+            <h3 class="text-sm font-semibold text-brand-900 mb-3">
               This correction updates the following record:
             </h3>
-            <div class="font-medium text-blue-900 text-lg">{referencedProtest.title}</div>
-            <div class="text-sm text-blue-700 mt-2">
+            <div class="font-medium text-brand-900 text-lg">{referencedProtest.title}</div>
+            <div class="text-sm text-brand-700 mt-2">
               {formatDate(referencedProtest.date_of_event)} • {referencedProtest.locality}, {referencedProtest.state_code}
             </div>
-            <div class="flex items-center gap-2 mt-3 text-sm text-blue-600 font-medium">
+            <div class="flex items-center gap-2 mt-3 text-sm text-brand-600 font-medium">
               <span>View original record</span>
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -434,7 +434,7 @@
       </p>
       <button
         on:click={() => navigator.clipboard.writeText(`${$page.url.origin}/protest/${protest.id}`)}
-        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-brand-600 hover:bg-brand-700"
       >
         Copy Link
       </button>

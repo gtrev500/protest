@@ -216,14 +216,14 @@
 </script>
 
 {#snippet datePickerInput(label: string)}
-  <div class="flex gap-2 items-center h-10 border border-gray-400 rounded-md px-3 bg-white hover:border-gray-400 focus-within:ring-1 focus-within:ring-blue-500 focus-within:border-blue-500">
+  <div class="flex gap-2 items-center h-10 border border-gray-400 rounded-md px-3 bg-white hover:border-gray-400 focus-within:ring-1 focus-within:ring-brand-500 focus-within:border-brand-500">
     <DatePicker.Input class="flex items-center flex-1 min-w-0">
       {#snippet children({ segments })}
         <div class="flex items-center gap-0.5">
           {#each segments as { part, value }}
             <DatePicker.Segment
               {part}
-              class="px-0.5 rounded focus:bg-blue-100 focus:outline-none tabular-nums text-sm"
+              class="px-0.5 rounded focus:bg-brand-100 focus:outline-none tabular-nums text-sm"
             >
               {value}
             </DatePicker.Segment>
@@ -250,13 +250,13 @@
     <DatePicker.Calendar class="flex flex-col gap-4">
       {#snippet children({ months, weekdays })}
         <DatePicker.Header class="flex items-center justify-between mb-2">
-          <DatePicker.PrevButton class="p-2 hover:bg-gray-100 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <DatePicker.PrevButton class="p-2 hover:bg-gray-100 rounded focus:outline-none focus:ring-2 focus:ring-brand-500">
             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
             </svg>
           </DatePicker.PrevButton>
           <DatePicker.Heading class="font-semibold text-gray-900" />
-          <DatePicker.NextButton class="p-2 hover:bg-gray-100 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <DatePicker.NextButton class="p-2 hover:bg-gray-100 rounded focus:outline-none focus:ring-2 focus:ring-brand-500">
             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
             </svg>
@@ -285,8 +285,8 @@
                       class="w-10 h-10 p-0"
                     >
                       <DatePicker.Day
-                        class="w-full h-full flex items-center justify-center rounded hover:bg-blue-50 text-sm
-                               data-[selected]:bg-blue-600 data-[selected]:text-white
+                        class="w-full h-full flex items-center justify-center rounded hover:bg-brand-50 text-sm
+                               data-[selected]:bg-brand-600 data-[selected]:text-white
                                data-[disabled]:text-gray-300 data-[disabled]:cursor-not-allowed
                                data-[outside-month]:text-gray-400"
                       >
@@ -306,7 +306,7 @@
 
 {#snippet protestCard(protest: any)}
   <div
-    class="bg-white rounded-lg shadow hover:shadow-lg hover:border-blue-100 border border-transparent transition-all cursor-pointer group"
+    class="bg-white rounded-lg shadow hover:shadow-lg hover:border-brand-100 border border-transparent transition-all cursor-pointer group"
     role="link"
     tabindex="0"
     onclick={() => window.location.href = `/protest/${protest.id}`}
@@ -339,7 +339,7 @@
 
       <!-- Title and Organization -->
       <div>
-        <h3 class="font-semibold text-base text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+        <h3 class="font-semibold text-base text-gray-900 group-hover:text-brand-600 transition-colors line-clamp-2">
           {protest.title}
         </h3>
         {#if protest.organization_name}
@@ -398,7 +398,7 @@
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
       <div class="bg-white rounded-lg shadow p-6">
         <h3 class="text-sm font-medium text-gray-500">Total Protests</h3>
-        <p class="text-3xl font-bold text-blue-600">{formatNumber(stats.total_protests)}</p>
+        <p class="text-3xl font-bold text-brand-600">{formatNumber(stats.total_protests)}</p>
       </div>
       
       <div class="bg-white rounded-lg shadow p-6">
@@ -429,7 +429,7 @@
           <Tooltip.Provider delayDuration={200}>
             <Tooltip.Root bind:open={showSearchHelp}>
               <Tooltip.Trigger
-                class="relative inline-flex items-center group align-middle ml-1 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+                class="relative inline-flex items-center group align-middle ml-1 focus:outline-none focus:ring-2 focus:ring-brand-500 rounded"
                 aria-label="Toggle advanced search help"
               >
                 <svg class="inline-block w-4 h-4 text-gray-400 hover:text-gray-600" fill="currentColor" viewBox="0 0 20 20">
@@ -459,7 +459,7 @@
           id="search"
           bind:value={searchTerm}
           placeholder="Search protests..."
-          class="w-full h-10 px-3 rounded-md border border-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          class="w-full h-10 px-3 rounded-md border border-gray-400 focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
         />
       </div>
 
@@ -480,7 +480,7 @@
               id="state-combobox"
               placeholder="Search states..."
               oninput={(e) => (searchValue = e.currentTarget.value)}
-              class="w-full h-10 px-3 pr-10 rounded-md border border-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              class="w-full h-10 px-3 pr-10 rounded-md border border-gray-400 focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
               aria-label="Search states"
             />
 
@@ -503,7 +503,7 @@
                 <Combobox.Item
                   value=""
                   label="All States"
-                  class="px-3 py-2 text-sm cursor-pointer rounded hover:bg-blue-50 focus:bg-blue-50 focus:outline-none data-[highlighted]:bg-blue-100 data-[selected]:bg-blue-600 data-[selected]:text-white"
+                  class="px-3 py-2 text-sm cursor-pointer rounded hover:bg-brand-50 focus:bg-brand-50 focus:outline-none data-[highlighted]:bg-brand-100 data-[selected]:bg-brand-600 data-[selected]:text-white"
                 >
                   {#snippet children({ selected })}
                     <div class="flex items-center justify-between">
@@ -521,7 +521,7 @@
                   <Combobox.Item
                     value={state.code}
                     label={state.name}
-                    class="px-3 py-2 text-sm cursor-pointer rounded hover:bg-blue-50 focus:bg-blue-50 focus:outline-none data-[highlighted]:bg-blue-100 data-[selected]:bg-blue-600 data-[selected]:text-white"
+                    class="px-3 py-2 text-sm cursor-pointer rounded hover:bg-brand-50 focus:bg-brand-50 focus:outline-none data-[highlighted]:bg-brand-100 data-[selected]:bg-brand-600 data-[selected]:text-white"
                   >
                     {#snippet children({ selected })}
                       <div class="flex items-center justify-between">
@@ -559,7 +559,7 @@
           id="submission-type"
           bind:value={selectedSubmissionType}
           onchange={handleFilterChange}
-          class="w-full h-10 px-3 rounded-md border border-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          class="w-full h-10 px-3 rounded-md border border-gray-400 focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
         >
           <option value="">All Types</option>
           {#each submissionTypes as type}
@@ -604,7 +604,7 @@
       {#if searchTerm}
         <button
           onclick={() => { searchTerm = ''; handleFilterChange(); }}
-          class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors"
+          class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-100 text-brand-800 hover:bg-brand-200 transition-colors"
         >
           <span>Search: "{searchTerm}"</span>
           <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
@@ -616,7 +616,7 @@
       {#if selectedState}
         <button
           onclick={() => { selectedState = ''; handleFilterChange(); }}
-          class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors"
+          class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-100 text-brand-800 hover:bg-brand-200 transition-colors"
         >
           <span>State: {selectedState}</span>
           <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
@@ -628,7 +628,7 @@
       {#if selectedSubmissionType}
         <button
           onclick={() => { selectedSubmissionType = ''; handleFilterChange(); }}
-          class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors"
+          class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-100 text-brand-800 hover:bg-brand-200 transition-colors"
         >
           <span>Type: {submissionTypes.find(t => String(t.id) === selectedSubmissionType)?.name || selectedSubmissionType}</span>
           <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
@@ -640,7 +640,7 @@
       {#if startDate}
         <button
           onclick={() => { startDateValue = undefined; handleFilterChange(); }}
-          class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors"
+          class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-100 text-brand-800 hover:bg-brand-200 transition-colors"
         >
           <span>From: {startDate}</span>
           <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
@@ -652,7 +652,7 @@
       {#if endDate}
         <button
           onclick={() => { endDateValue = undefined; handleFilterChange(); }}
-          class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors"
+          class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-100 text-brand-800 hover:bg-brand-200 transition-colors"
         >
           <span>To: {endDate}</span>
           <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
@@ -692,7 +692,7 @@
           handleSortChange();
         }}
         value={`${sortField === 'date_of_event' ? 'event' : 'submitted'}_${sortOrder}`}
-        class="h-10 px-3 pr-8 rounded-md border border-gray-300 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm"
+        class="h-10 px-3 pr-8 rounded-md border border-gray-300 bg-white focus:border-brand-500 focus:ring-1 focus:ring-brand-500 text-sm"
       >
         <option value="event_desc">Event Date (Newest First)</option>
         <option value="event_asc">Event Date (Oldest First)</option>
@@ -707,7 +707,7 @@
           isManualSelection = true;
           viewMode = 'table';
         }}
-        class="h-10 px-3 flex items-center gap-2 text-sm font-medium rounded-l-md border border-gray-300 transition-colors {viewMode === 'table' ? 'bg-blue-50 border-blue-500 text-blue-700 z-10' : 'bg-white text-gray-700 hover:bg-gray-50'}"
+        class="h-10 px-3 flex items-center gap-2 text-sm font-medium rounded-l-md border border-gray-300 transition-colors {viewMode === 'table' ? 'bg-brand-50 border-brand-500 text-brand-700 z-10' : 'bg-white text-gray-700 hover:bg-gray-50'}"
         aria-label="Table view"
         aria-pressed={viewMode === 'table'}
       >
@@ -721,7 +721,7 @@
           isManualSelection = true;
           viewMode = 'card';
         }}
-        class="h-10 px-3 flex items-center gap-2 text-sm font-medium rounded-r-md border border-l-0 border-gray-300 transition-colors {viewMode === 'card' ? 'bg-blue-50 border-blue-500 text-blue-700 z-10' : 'bg-white text-gray-700 hover:bg-gray-50'}"
+        class="h-10 px-3 flex items-center gap-2 text-sm font-medium rounded-r-md border border-l-0 border-gray-300 transition-colors {viewMode === 'card' ? 'bg-brand-50 border-brand-500 text-brand-700 z-10' : 'bg-white text-gray-700 hover:bg-gray-50'}"
         aria-label="Card view"
         aria-pressed={viewMode === 'card'}
       >
@@ -736,7 +736,7 @@
   <!-- Protests Content -->
   {#if loading}
     <div class="bg-white rounded-lg shadow p-8 text-center">
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div>
       <p class="mt-2 text-gray-500">Loading protests...</p>
     </div>
   {:else if protests.length === 0}
@@ -793,7 +793,7 @@
                   {formatDate(protest.created_at)}
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-900">
-                  <a href="/protest/{protest.id}" class="block hover:text-blue-600 transition-colors">
+                  <a href="/protest/{protest.id}" class="block hover:text-brand-600 transition-colors">
                     <div class="font-medium">{protest.title}</div>
                     {#if protest.organization_name}
                       <div class="text-gray-500">{protest.organization_name}</div>
@@ -814,7 +814,7 @@
                   <div class="flex flex-wrap gap-1">
                     {#if protest.event_types}
                       {#each protest.event_types.slice(0, 3) as type}
-                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-brand-100 text-brand-800">
                           {type}
                         </span>
                       {/each}
@@ -842,7 +842,7 @@
                 <td class="px-6 py-4 whitespace-nowrap text-sm">
                   <a
                     href="/protest/{protest.id}"
-                    class="text-blue-600 hover:text-blue-900"
+                    class="text-brand-600 hover:text-brand-900"
                   >
                     View Details
                   </a>

@@ -36,10 +36,10 @@
     {name}
     bind:value
     {required}
-    class="mt-1 block w-full h-10 px-3 rounded-md border border-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-    class:border-red-400={error}
-    class:focus:border-red-500={error}
-    class:focus:ring-red-500={error}
+    class="mt-1 block w-full h-10 px-3 rounded-md border border-gray-400 focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+    class:border-danger-400={error}
+    class:focus:border-danger-500={error}
+    class:focus:ring-danger-500={error}
   >
     <option value="">{placeholder}</option>
     {#each options as option}
@@ -47,6 +47,6 @@
     {/each}
   </select>
   {#if error}
-    <p class="mt-1 text-sm text-red-600">{error}</p>
+    <p class="mt-1 text-sm text-danger-600">{error}</p>
   {/if}
 </div>

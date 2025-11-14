@@ -1,1 +1,31 @@
 @import 'tailwindcss' source("../");
+
+@theme {
+  /* 50501 Brand Colors */
+
+  /* Primary Brand Blue - #3E549F */
+  --color-brand-50: #f0f2fa;
+  --color-brand-100: #dce1f2;
+  --color-brand-200: #c0c9e8;
+  --color-brand-300: #9ba9da;
+  --color-brand-400: #7485c9;
+  --color-brand-500: #5566b7;
+  --color-brand-600: #3e549f; /* Base brand color */
+  --color-brand-700: #364683;
+  --color-brand-800: #2f3b6d;
+  --color-brand-900: #2b345b;
+  --color-brand-950: #1a1f39;
+
+  /* Danger/Error Red - #ED1C24 */
+  --color-danger-50: #fef2f2;
+  --color-danger-100: #fee2e2;
+  --color-danger-200: #fecaca;
+  --color-danger-300: #fca5a7;
+  --color-danger-400: #f87176;
+  --color-danger-500: #f04349;
+  --color-danger-600: #ed1c24; /* Base danger color */
+  --color-danger-700: #c81119;
+  --color-danger-800: #a51218;
+  --color-danger-900: #88151a;
+  --color-danger-950: #4b0609;
+}

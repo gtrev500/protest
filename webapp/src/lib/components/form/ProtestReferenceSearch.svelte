@@ -212,13 +212,13 @@
         onfocus={() => { if (searchResults.length > 0) showResults = true; }}
         placeholder="Search by location, date, organization, or keywords..."
         class="w-full px-4 py-2 pr-10 border rounded-md shadow-sm
-               focus:ring-blue-500 focus:border-blue-500 transition-colors
-               {error ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300'}"
+               focus:ring-brand-500 focus:border-brand-500 transition-colors
+               {error ? 'border-danger-300 focus:ring-danger-500 focus:border-danger-500' : 'border-gray-300'}"
       />
 
       {#if isSearching}
         <div class="absolute right-3 top-2.5">
-          <div class="animate-spin h-5 w-5 border-2 border-blue-500
+          <div class="animate-spin h-5 w-5 border-2 border-brand-500
                       border-t-transparent rounded-full"></div>
         </div>
       {:else if searchQuery.length >= 3 && !showResults}
@@ -237,7 +237,7 @@
               type="button"
               onclick={() => selectProtest(protest)}
               class="w-full text-left px-4 py-3 hover:bg-gray-50
-                     focus:bg-blue-50 focus:outline-none border-b border-gray-100
+                     focus:bg-brand-50 focus:outline-none border-b border-gray-100
                      transition-colors last:border-b-0"
             >
               <div class="font-medium text-gray-900">
@@ -303,7 +303,7 @@
         <button
           type="button"
           onclick={clearSelection}
-          class="ml-4 text-blue-600 hover:text-blue-800 text-sm"
+          class="ml-4 text-brand-600 hover:text-brand-800 text-sm"
         >
           Change
         </button>
@@ -313,6 +313,6 @@
   {/if}
 
   {#if error}
-    <p class="text-sm text-red-600 mt-1">{error}</p>
+    <p class="text-sm text-danger-600 mt-1">{error}</p>
   {/if}
 </div>

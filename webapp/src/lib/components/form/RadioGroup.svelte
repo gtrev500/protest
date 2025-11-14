@@ -41,11 +41,11 @@
         name={`${name}_details`}
         bind:value={detailsValue}
         placeholder={detailsPlaceholder}
-        class="flex-1 h-10 px-3 text-sm rounded-md border border-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+        class="flex-1 h-10 px-3 text-sm rounded-md border border-gray-400 focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
       />
     {/if}
   </div>
   {#if error}
-    <p class="mt-1 text-sm text-red-600">{error}</p>
+    <p class="mt-1 text-sm text-danger-600">{error}</p>
   {/if}
 </div>

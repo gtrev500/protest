@@ -72,7 +72,7 @@
         <span class="">*</span>
       {/if}
     </legend>
-    <div class="space-y-2 max-h-60 overflow-y-auto border rounded p-2 {error ? 'border-black' : 'border-gray-300'}">
+    <div class="space-y-2 max-h-60 overflow-y-auto border rounded p-2 {error ? 'border-danger-400' : 'border-gray-300'}">
     {#each options as option, index}
       {#if option.id !== 0}
         <label class="flex items-center">
@@ -92,7 +92,7 @@
                 values = values.filter(v => v !== value);
               }
             }}
-            class="rounded border-gray-300 text-blue-600"
+            class="rounded border-gray-300 text-brand-600"
           />
           <span class="ml-2 text-sm">{autoCapitalize ? capitalize(option.name) : option.name}</span>
         </label>
@@ -117,7 +117,7 @@
               otherValue = '';
             }
           }}
-          class="rounded border-gray-300 text-blue-600 mt-1"
+          class="rounded border-gray-300 text-brand-600 mt-1"
         />
         <div class="ml-2 flex-1">
           <span class="text-sm">Other:</span>
@@ -127,7 +127,7 @@
               name={`${name}_other`}
               bind:value={otherValue}
               bind:this={otherInputElement}
-              class="mt-1 block w-full h-10 px-3 text-sm rounded-md border border-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              class="mt-1 block w-full h-10 px-3 text-sm rounded-md border border-gray-400 focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
               placeholder={otherPlaceholder}
             />
           {/if}
@@ -142,7 +142,7 @@
     </p>
   {/if}
   {#if error}
-    <p class="mt-1 text-sm text-red-600">
+    <p class="mt-1 text-sm text-danger-600">
       {error}
     </p>
   {/if}

@@ -30,7 +30,7 @@
     type="checkbox"
     name={checkboxName}
     value={checkboxValue}
-    class="rounded border-gray-300 text-blue-600 mt-1"
+    class="rounded border-gray-300 text-brand-600 mt-1"
     bind:checked
   />
 

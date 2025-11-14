@@ -67,8 +67,8 @@
   const inputClasses = $derived(
     `mt-1 flex h-10 w-full items-center rounded-md border bg-white px-3 py-2 text-sm shadow-sm transition-colors hover:border-gray-400 focus-within:outline-none focus-within:ring-2 focus-within:border-transparent ${
       error
-        ? 'border-red-300 focus-within:ring-red-500'
-        : 'border-gray-300 focus-within:ring-blue-500'
+        ? 'border-danger-400 focus-within:ring-danger-500'
+        : 'border-gray-400 focus-within:ring-brand-500'
     }`
   );
 </script>
@@ -90,13 +90,13 @@
         {#each segments as { part, value: segmentValue }}
           <DatePicker.Segment
             {part}
-            class="inline-block select-none rounded px-0.5 py-1 focus:bg-blue-100 focus:text-blue-900 focus:outline-none"
+            class="inline-block select-none rounded px-0.5 py-1 focus:bg-brand-100 focus:text-brand-900 focus:outline-none"
           >
             {segmentValue}
           </DatePicker.Segment>
         {/each}
         <DatePicker.Trigger
-          class="ml-auto inline-flex h-8 w-8 items-center justify-center rounded-md text-gray-500 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="ml-auto inline-flex h-8 w-8 items-center justify-center rounded-md text-gray-500 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -125,7 +125,7 @@
         {#snippet children({ months, weekdays })}
           <DatePicker.Header class="mb-4 flex items-center justify-between">
             <DatePicker.PrevButton
-              class="inline-flex h-8 w-8 items-center justify-center rounded-md text-gray-700 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="inline-flex h-8 w-8 items-center justify-center rounded-md text-gray-700 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -145,7 +145,7 @@
             <DatePicker.Heading class="text-sm font-semibold text-gray-900" />
 
             <DatePicker.NextButton
-              class="inline-flex h-8 w-8 items-center justify-center rounded-md text-gray-700 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="inline-flex h-8 w-8 items-center justify-center rounded-md text-gray-700 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -185,7 +185,7 @@
                         class="flex h-8 w-8 items-center justify-center"
                       >
                         <DatePicker.Day
-                          class="flex h-8 w-8 items-center justify-center rounded-md text-sm transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 data-[selected]:bg-blue-600 data-[selected]:text-white data-[selected]:hover:bg-blue-700 data-[disabled]:text-gray-300 data-[disabled]:hover:bg-transparent data-[outside-month]:text-gray-400"
+                          class="flex h-8 w-8 items-center justify-center rounded-md text-sm transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500 data-[selected]:bg-brand-600 data-[selected]:text-white data-[selected]:hover:bg-brand-700 data-[disabled]:text-gray-300 data-[disabled]:hover:bg-transparent data-[outside-month]:text-gray-400"
                         >
                           {date.day}
                         </DatePicker.Day>
@@ -202,7 +202,7 @@
   </DatePicker.Root>
 
   {#if error}
-    <p class="mt-1 text-sm text-red-600">{error}</p>
+    <p class="mt-1 text-sm text-danger-600">{error}</p>
   {/if}
 
   <!-- Hidden input for form submission -->

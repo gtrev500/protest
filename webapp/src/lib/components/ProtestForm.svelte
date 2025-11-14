@@ -249,14 +249,14 @@
   </p>
 
   <!-- Instructions notice -->
-  <div class="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-md">
-    <p class="text-sm text-blue-800">
+  <div class="mb-8 p-4 bg-brand-50 border border-brand-200 rounded-md">
+    <p class="text-sm text-brand-800">
       Please review the
       <a
         href="https://docs.google.com/document/d/1Ik3yR2izOlFa9aHUq0lqKvNGwhaGC2qCcIEKJAAxYB8/edit?tab=t.0#heading=h.jxeic6xv6aab"
         target="_blank"
         rel="noopener noreferrer"
-        class="underline hover:text-blue-900 font-medium"
+        class="underline hover:text-brand-900 font-medium"
       >
         submission instructions
       </a> before filling out this form.
@@ -265,10 +265,10 @@
 
   <!-- Show reference loading indicator -->
   {#if isLoadingReference}
-    <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
+    <div class="mb-6 p-4 bg-brand-50 border border-brand-200 rounded-md">
       <div class="flex items-center">
-        <div class="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full mr-3"></div>
-        <p class="text-sm font-medium text-blue-800">Loading protest data...</p>
+        <div class="animate-spin h-5 w-5 border-2 border-brand-500 border-t-transparent rounded-full mr-3"></div>
+        <p class="text-sm font-medium text-brand-800">Loading protest data...</p>
       </div>
     </div>
   {/if}
@@ -305,13 +305,13 @@
 
   <!-- Show validation errors -->
   {#if hasErrors}
-    <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
+    <div class="mb-6 p-4 bg-danger-50 border border-danger-200 rounded-md">
       {#if errorMessage}
-        <p class="text-sm font-medium text-red-800 mb-2">{errorMessage}</p>
+        <p class="text-sm font-medium text-danger-800 mb-2">{errorMessage}</p>
       {/if}
       {#if Object.keys(errors).length > 0}
-        <h3 class="text-sm font-medium text-red-800 mb-2">Please fix the following errors:</h3>
-        <ul class="list-disc list-inside text-sm text-red-700">
+        <h3 class="text-sm font-medium text-danger-800 mb-2">Please fix the following errors:</h3>
+        <ul class="list-disc list-inside text-sm text-danger-700">
           {#each Object.entries(errors) as [field, fieldErrors]}
             {#if fieldErrors}
               {#each Array.isArray(fieldErrors) ? fieldErrors : [fieldErrors] as error}
@@ -418,7 +418,7 @@
           type="checkbox"
           name="is_online"
           bind:checked={formData.is_online}
-          class="rounded border-gray-300 text-blue-600"
+          class="rounded border-gray-300 text-brand-600"
         />
         <span class="ml-2 text-sm font-medium">This was an online event</span>
       </label>
@@ -517,7 +517,7 @@
           size="normal"
         />
         {#if turnstileError}
-          <p class="mt-2 text-sm text-red-600">Please complete the CAPTCHA verification</p>
+          <p class="mt-2 text-sm text-danger-600">Please complete the CAPTCHA verification</p>
         {/if}
       {:else}
         <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
@@ -534,7 +534,7 @@
       <button
         type="submit"
         disabled={isSubmitting}
-        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400"
+        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 disabled:bg-gray-400"
       >
         {isSubmitting ? 'Submitting...' : 'Submit Protest Information'}
       </button>
