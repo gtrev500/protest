@@ -1,6 +1,6 @@
 <!-- ProtestDashboard.svelte -->
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, untrack } from 'svelte';
   import { supabase } from '$lib/supabase';
   import { Tooltip, DateRangePicker, Combobox, type DateRange } from 'bits-ui';
   import { CalendarDate } from '@internationalized/date';
@@ -101,8 +101,28 @@
   // Watch for date range changes and trigger filter
   $effect(() => {
     if (dateRange !== undefined) {
-      handleFilterChange();
+      // Use untrack to prevent this effect from tracking searchTerm and other dependencies
+      untrack(() => handleFilterChange());
     }
+  });
+
+  // Debounced search effect
+  let isInitialMount = true;
+  $effect(() => {
+    // Track searchTerm changes
+    const term = searchTerm;
+
+    // Skip debounce on initial mount (onMount already loads protests)
+    if (isInitialMount) {
+      isInitialMount = false;
+      return;
+    }
+
+    clearTimeout(searchDebounceTimer);
+    searchDebounceTimer = window.setTimeout(() => {
+      page = 1;
+      loadProtests();
+    }, 300);
   });
 
   onMount(() => {
@@ -138,15 +158,6 @@
   function handleFilterChange() {
     page = 1;
     loadProtests();
-  }
-
-  // Debounced search handler for search input
-  function handleSearchInput() {
-    clearTimeout(searchDebounceTimer);
-    searchDebounceTimer = window.setTimeout(() => {
-      page = 1;
-      loadProtests();
-    }, 300); // 300ms debounce
   }
 
   // Handle sort change
@@ -243,7 +254,6 @@
           type="text"
           id="search"
           bind:value={searchTerm}
-          oninput={handleSearchInput}
           placeholder="Search protests..."
           class="w-full h-10 px-3 rounded-md border border-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
         />
