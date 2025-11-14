@@ -213,25 +213,6 @@
     page = 1;
     loadProtests();
   }
-
-  // Handle column header click for sorting
-  function handleColumnSort(field: string) {
-    if (sortField === field) {
-      // Toggle sort order if clicking same column
-      sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
-    } else {
-      // Default to descending when switching columns
-      sortField = field;
-      sortOrder = 'desc';
-    }
-    handleSortChange();
-  }
-
-  // Get sort icon for column header
-  function getSortIcon(field: string) {
-    if (sortField !== field) return ''; // No icon when not sorted
-    return sortOrder === 'asc' ? '↑' : '↓';
-  }
 </script>
 
 {#snippet datePickerInput(label: string)}
@@ -698,32 +679,28 @@
 
   <!-- View Toggle -->
   <div class="flex justify-between items-center mb-4 gap-4">
-    <!-- Sort dropdown for card view -->
-    {#if viewMode === 'card'}
-      <div class="flex items-center gap-2">
-        <label for="card-sort" class="text-sm font-medium text-gray-700">Sort by:</label>
-        <select
-          id="card-sort"
-          bind:value={sortField}
-          onchange={() => { sortOrder = 'desc'; handleSortChange(); }}
-          class="h-10 px-3 pr-8 rounded-md border border-gray-300 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm"
-        >
-          <option value="date_of_event">Event Date</option>
-          <option value="created_at">Submitted Date</option>
-        </select>
-        <button
-          onclick={() => { sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'; handleSortChange(); }}
-          class="px-3 py-2 rounded-md border border-gray-300 bg-white hover:bg-gray-50 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
-          aria-label="Toggle sort order"
-        >
-          <svg class="w-4 h-4 {sortOrder === 'asc' ? 'rotate-180' : ''} transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
-      </div>
-    {:else}
-      <div></div>
-    {/if}
+    <!-- Sort dropdown -->
+    <div class="flex items-center gap-2">
+      <label for="sort-field" class="text-sm font-medium text-gray-700">Sort by:</label>
+      <select
+        id="sort-field"
+        bind:value={sortField}
+        onchange={() => { sortOrder = 'desc'; handleSortChange(); }}
+        class="h-10 px-3 pr-8 rounded-md border border-gray-300 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm"
+      >
+        <option value="date_of_event">Event Date</option>
+        <option value="created_at">Submitted Date</option>
+      </select>
+      <button
+        onclick={() => { sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'; handleSortChange(); }}
+        class="px-3 py-2 rounded-md border border-gray-300 bg-white hover:bg-gray-50 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+        aria-label="Toggle sort order"
+      >
+        <svg class="w-4 h-4 {sortOrder === 'asc' ? 'rotate-180' : ''} transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+    </div>
 
     <div class="flex items-center gap-1 bg-white rounded-lg shadow p-1" role="group" aria-label="View mode">
       <button
@@ -782,22 +759,10 @@
           <thead class="bg-gray-50">
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                <button
-                onclick={() => handleColumnSort('date_of_event')}
-                  class="flex items-center gap-1 hover:text-gray-700 transition-colors"
-                >
-                  Event Date
-                  <span class="text-gray-400">{getSortIcon('date_of_event')}</span>
-                </button>
+                Event Date
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                <button
-                onclick={() => handleColumnSort('created_at')}
-                  class="flex items-center gap-1 hover:text-gray-700 transition-colors"
-                >
-                  Submitted
-                  <span class="text-gray-400">{getSortIcon('created_at')}</span>
-                </button>
+                Submitted
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Title
