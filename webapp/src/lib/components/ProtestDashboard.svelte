@@ -141,6 +141,21 @@
   });
 
   onMount(() => {
+    // Load preferences from localStorage
+    const savedViewMode = localStorage.getItem('protestDashboard_viewMode');
+    const savedSortField = localStorage.getItem('protestDashboard_sortField');
+    const savedSortOrder = localStorage.getItem('protestDashboard_sortOrder');
+
+    if (savedViewMode && ['table', 'card', 'auto'].includes(savedViewMode)) {
+      viewMode = savedViewMode as 'table' | 'card' | 'auto';
+    }
+    if (savedSortField) {
+      sortField = savedSortField;
+    }
+    if (savedSortOrder && ['asc', 'desc'].includes(savedSortOrder)) {
+      sortOrder = savedSortOrder as 'asc' | 'desc';
+    }
+
     loadStates();
     loadSubmissionTypes();
     loadProtests();
@@ -160,6 +175,22 @@
     };
   });
 
+  // Save preferences to localStorage when they change
+  $effect(() => {
+    const mode = viewMode;
+    localStorage.setItem('protestDashboard_viewMode', mode);
+  });
+
+  $effect(() => {
+    const field = sortField;
+    localStorage.setItem('protestDashboard_sortField', field);
+  });
+
+  $effect(() => {
+    const order = sortOrder;
+    localStorage.setItem('protestDashboard_sortOrder', order);
+  });
+
   // Computed values
   let totalPages = $derived(Math.ceil(totalCount / pageSize));
   
@@ -170,13 +201,14 @@
 
   function formatDate(dateStr: string) {
     if (!dateStr) return '';
+
     // Check if it's already a timestamp with time (contains 'T')
-    if (dateStr.includes('T')) {
-      return new Date(dateStr).toLocaleDateString();
-    }
-    // Add 'T00:00:00' to ensure the date is parsed as local time, not UTC
-    // This prevents the date from shifting due to timezone differences
-    return new Date(dateStr + 'T00:00:00').toLocaleDateString();
+    const date = new Date(dateStr.includes('T') ? dateStr : dateStr + 'T00:00:00');
+
+    // Check if date is valid
+    if (isNaN(date.getTime())) return '';
+
+    return date.toLocaleDateString();
   }
 
   // Reset page when filters change
@@ -301,101 +333,87 @@
 {/snippet}
 
 {#snippet protestCard(protest: any)}
-  <div class="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-6 flex flex-col gap-4">
-    <!-- Date badges -->
-    <div class="flex gap-2 text-xs text-gray-600">
-      <div class="flex items-center gap-1">
-        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-        <span>{formatDate(protest.date_of_event)}</span>
+  <div
+    class="bg-white rounded-lg shadow hover:shadow-lg hover:border-blue-100 border border-transparent transition-all cursor-pointer group"
+    role="link"
+    tabindex="0"
+    onclick={() => window.location.href = `/protest/${protest.id}`}
+    onkeydown={(e) => e.key === 'Enter' && (window.location.href = `/protest/${protest.id}`)}
+    aria-label="View details for {protest.title}"
+  >
+    <div class="p-4 flex flex-col gap-2.5">
+      <!-- Date section -->
+      <div class="flex items-start justify-between gap-2 text-xs">
+        <div class="flex items-center gap-1">
+          <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          {#if formatDate(protest.date_of_event)}
+            <span class="font-medium text-gray-700">{formatDate(protest.date_of_event)}</span>
+          {:else}
+            <span class="text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded text-[11px] font-medium">Date TBD</span>
+          {/if}
+        </div>
+        <div class="flex items-center gap-1.5 text-[11px]">
+          {#if protest.submission_types?.some(t => t === 'data correction')}
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-800 shadow-sm">
+              Correction
+            </span>
+            <span class="text-gray-300">•</span>
+          {/if}
+          <span class="text-gray-500">Submitted {formatDate(protest.created_at)}</span>
+        </div>
       </div>
-      <span class="text-gray-300">•</span>
-      <div class="flex items-center gap-1">
-        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <span>Submitted {formatDate(protest.created_at)}</span>
-      </div>
-    </div>
 
-    <!-- Title -->
-    <a href="/protest/{protest.id}" class="group">
-      <h3 class="font-semibold text-lg text-gray-900 group-hover:text-blue-600 transition-colors">
-        {protest.title}
-      </h3>
-      {#if protest.organization_name}
-        <p class="text-sm text-gray-600 mt-1">{protest.organization_name}</p>
-      {/if}
-    </a>
-
-    <!-- Location -->
-    <div class="flex items-start gap-2 text-sm text-gray-700">
-      <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
-      <span>{protest.locality}, {protest.state_code}</span>
-    </div>
-
-    <!-- Participants -->
-    <div class="flex items-start gap-2 text-sm text-gray-700">
-      <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-      </svg>
-      <span>
-        {#if protest.crowd_size_low || protest.crowd_size_high}
-          {formatNumber(protest.crowd_size_low)} - {formatNumber(protest.crowd_size_high)} participants
-        {:else}
-          <span class="text-gray-400">Participants not reported</span>
-        {/if}
-      </span>
-    </div>
-
-    <!-- Event Types -->
-    {#if protest.event_types && protest.event_types.length > 0}
+      <!-- Title and Organization -->
       <div>
-        <div class="text-xs font-medium text-gray-500 mb-2">Event Types:</div>
+        <h3 class="font-semibold text-base text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+          {protest.title}
+        </h3>
+        {#if protest.organization_name}
+          <p class="text-xs text-gray-500 mt-1">{protest.organization_name}</p>
+        {/if}
+      </div>
+
+      <!-- Location and Participants -->
+      <div class="flex flex-col gap-1 text-sm text-gray-700">
+        <!-- Location -->
+        <div class="flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span class="text-xs">{protest.locality}, {protest.state_code}</span>
+        </div>
+
+        <!-- Participants -->
+        {#if protest.crowd_size_low || protest.crowd_size_high}
+          <div class="flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+            <span class="text-xs">{formatNumber(protest.crowd_size_low)}–{formatNumber(protest.crowd_size_high)} people</span>
+          </div>
+        {:else}
+          <div class="text-xs text-gray-400 italic">Attendance not reported</div>
+        {/if}
+      </div>
+
+      <!-- Event Types (gray pills) -->
+      {#if protest.event_types && protest.event_types.length > 0}
         <div class="flex flex-wrap gap-1">
-          {#each protest.event_types.slice(0, 5) as type}
-            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
+          {#each protest.event_types.slice(0, 4) as type}
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-700">
               {type}
             </span>
           {/each}
-          {#if protest.event_types.length > 5}
-            <span class="text-xs text-gray-500 px-2 py-1">
-              +{protest.event_types.length - 5} more
+          {#if protest.event_types.length > 4}
+            <span class="text-xs text-gray-500">
+              +{protest.event_types.length - 4} more
             </span>
           {/if}
         </div>
-      </div>
-    {/if}
-
-    <!-- Submission Type -->
-    {#if protest.submission_types && protest.submission_types.length > 0}
-      <div>
-        <div class="text-xs font-medium text-gray-500 mb-2">Submission Type:</div>
-        <div class="flex flex-wrap gap-1">
-          {#each protest.submission_types as type}
-            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium {type === 'data correction' ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'}">
-              {type}
-            </span>
-          {/each}
-        </div>
-      </div>
-    {/if}
-
-    <!-- View Details Button -->
-    <div class="mt-auto pt-4 border-t border-gray-100">
-      <a
-        href="/protest/{protest.id}"
-        class="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
-      >
-        View Details
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg>
-      </a>
+      {/if}
     </div>
   </div>
 {/snippet}
@@ -606,8 +624,89 @@
     </div>
   </div>
 
+  <!-- Active Filters -->
+  {#if searchTerm || selectedState || selectedSubmissionType || startDate || endDate}
+    <div class="flex flex-wrap items-center gap-2 mb-4 text-sm">
+      <span class="text-gray-600 font-medium">Active filters:</span>
+
+      {#if searchTerm}
+        <button
+          onclick={() => { searchTerm = ''; handleFilterChange(); }}
+          class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors"
+        >
+          <span>Search: "{searchTerm}"</span>
+          <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </button>
+      {/if}
+
+      {#if selectedState}
+        <button
+          onclick={() => { selectedState = ''; handleFilterChange(); }}
+          class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors"
+        >
+          <span>State: {selectedState}</span>
+          <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </button>
+      {/if}
+
+      {#if selectedSubmissionType}
+        <button
+          onclick={() => { selectedSubmissionType = ''; handleFilterChange(); }}
+          class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors"
+        >
+          <span>Type: {submissionTypes.find(t => String(t.id) === selectedSubmissionType)?.name || selectedSubmissionType}</span>
+          <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </button>
+      {/if}
+
+      {#if startDate}
+        <button
+          onclick={() => { startDateValue = undefined; handleFilterChange(); }}
+          class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors"
+        >
+          <span>From: {startDate}</span>
+          <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </button>
+      {/if}
+
+      {#if endDate}
+        <button
+          onclick={() => { endDateValue = undefined; handleFilterChange(); }}
+          class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors"
+        >
+          <span>To: {endDate}</span>
+          <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </button>
+      {/if}
+
+      <button
+        onclick={() => {
+          searchTerm = '';
+          selectedState = '';
+          selectedSubmissionType = '';
+          startDateValue = undefined;
+          endDateValue = undefined;
+          handleFilterChange();
+        }}
+        class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-gray-700 hover:bg-gray-100 transition-colors underline"
+      >
+        Clear all
+      </button>
+    </div>
+  {/if}
+
   <!-- View Toggle -->
-  <div class="flex justify-between items-center mb-4 gap-2">
+  <div class="flex justify-between items-center mb-4 gap-4">
     <!-- Sort dropdown for card view -->
     {#if currentView === 'card'}
       <div class="flex items-center gap-2">
@@ -626,7 +725,7 @@
           class="px-3 py-2 rounded-md border border-gray-300 bg-white hover:bg-gray-50 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
           aria-label="Toggle sort order"
         >
-          <svg class="w-4 h-4 {sortOrder === 'asc' ? 'rotate-180' : ''} transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 {sortOrder === 'asc' ? 'rotate-180' : ''} transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
           </svg>
         </button>
@@ -635,13 +734,14 @@
       <div></div>
     {/if}
 
-    <div class="flex items-center gap-1 bg-white rounded-lg shadow p-1">
+    <div class="flex items-center gap-1 bg-white rounded-lg shadow p-1" role="group" aria-label="View mode">
       <button
         onclick={() => viewMode = 'table'}
         class="px-3 py-2 rounded flex items-center gap-2 text-sm font-medium transition-colors {viewMode === 'table' ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}"
         aria-label="Table view"
+        aria-pressed={viewMode === 'table'}
       >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
         </svg>
         <span class="hidden sm:inline">Table</span>
@@ -650,8 +750,9 @@
         onclick={() => viewMode = 'card'}
         class="px-3 py-2 rounded flex items-center gap-2 text-sm font-medium transition-colors {viewMode === 'card' ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}"
         aria-label="Card view"
+        aria-pressed={viewMode === 'card'}
       >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
         </svg>
         <span class="hidden sm:inline">Cards</span>
@@ -660,8 +761,9 @@
         onclick={() => viewMode = 'auto'}
         class="px-3 py-2 rounded flex items-center gap-2 text-sm font-medium transition-colors {viewMode === 'auto' ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}"
         aria-label="Auto responsive view"
+        aria-pressed={viewMode === 'auto'}
       >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
         </svg>
         <span class="hidden sm:inline">Auto</span>
@@ -824,7 +926,7 @@
         </div>
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
-            <p class="text-sm text-gray-700">
+            <p class="text-sm text-gray-700" aria-live="polite" aria-atomic="true">
               Showing <span class="font-medium">{(page - 1) * pageSize + 1}</span> to
               <span class="font-medium">{Math.min(page * pageSize, totalCount)}</span> of
               <span class="font-medium">{formatNumber(totalCount)}</span> results
