@@ -118,10 +118,10 @@ export function populateFormData(
   });
 
   // Handle multiselects without "other" (if any)
-  MULTISELECT_WITHOUT_OTHER.forEach(field => {
-    const data = protest[field] as any[];
+  MULTISELECT_WITHOUT_OTHER.forEach((field: string) => {
+    const data = (protest as any)[field] as any[];
     formData[field] = data
-      ? data.map(item => item[`${field.slice(0, -1)}_id`]?.toString()).filter(Boolean)
+      ? data.map((item: any) => item[`${field.slice(0, -1)}_id`]?.toString()).filter(Boolean)
       : [];
   });
 }

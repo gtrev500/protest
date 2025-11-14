@@ -1,13 +1,13 @@
 <!-- ProtestDetail.svelte -->
-<script>
+<script lang="ts">
   import { page } from '$app/stores';
   import { onMount } from 'svelte';
   import { supabase } from '$lib/supabase';
 
-  let protest = null;
+  let protest: any | null = null;
   let loading = true;
-  let referencedProtest = null;
-  let corrections = [];
+  let referencedProtest: any | null = null;
+  let corrections: any[] = [];
 
   async function loadProtest() {
     const id = $page.params.id;
@@ -90,7 +90,7 @@
     loadProtest();
   }
 
-  function formatDate(dateStr) {
+  function formatDate(dateStr: string): string {
     if (!dateStr) return '';
     // Add 'T00:00:00' to ensure the date is parsed as local time, not UTC
     // This prevents the date from shifting due to timezone differences
@@ -102,7 +102,7 @@
     });
   }
 
-  function formatNumber(num) {
+  function formatNumber(num: number): string {
     if (!num) return '0';
     return new Intl.NumberFormat().format(num);
   }
