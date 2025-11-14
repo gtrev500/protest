@@ -551,10 +551,12 @@
                   {formatDate(protest.created_at)}
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-900">
-                  <div class="font-medium">{protest.title}</div>
-                  {#if protest.organization_name}
-                    <div class="text-gray-500">{protest.organization_name}</div>
-                  {/if}
+                  <a href="/protest/{protest.id}" class="block hover:text-blue-600 transition-colors">
+                    <div class="font-medium">{protest.title}</div>
+                    {#if protest.organization_name}
+                      <div class="text-gray-500">{protest.organization_name}</div>
+                    {/if}
+                  </a>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {protest.locality}, {protest.state_code}
