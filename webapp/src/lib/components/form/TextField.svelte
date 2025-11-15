@@ -26,7 +26,7 @@
 
 <div class={className}>
   <label for={name} class="block text-sm font-medium text-gray-700">
-    {@html label} {required ? '*' : ''}
+    {@html label} {#if required}<span class="text-danger-500">*</span>{/if}
   </label>
   <input
     {type}

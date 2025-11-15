@@ -69,7 +69,7 @@
     <legend class="block text-sm font-medium text-gray-700 mb-2">
       {label}
       {#if required}
-        <span class="">*</span>
+        <span class="text-danger-500">*</span>
       {/if}
     </legend>
     <div class="space-y-2 max-h-60 overflow-y-auto border rounded p-2 {error ? 'border-danger-400' : 'border-gray-300'}">

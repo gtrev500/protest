@@ -50,7 +50,7 @@
 
 <fieldset>
   <legend class="block text-sm font-medium text-gray-700 mb-2">
-    Submission Type *
+    Submission Type <span class="text-danger-500">*</span>
   </legend>
 
   <div class="space-y-2 border rounded p-2">

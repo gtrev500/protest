@@ -75,7 +75,7 @@
 
 <div class={className}>
   <label for={name} class="block text-sm font-medium text-gray-700 mb-1">
-    {label} {required ? '*' : ''}
+    {label} {#if required}<span class="text-danger-500">*</span>{/if}
   </label>
 
   <DatePicker.Root
