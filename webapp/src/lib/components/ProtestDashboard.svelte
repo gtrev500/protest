@@ -66,13 +66,15 @@
       // Get total count from the first row (added via COUNT(*) OVER())
       totalCount = protests.length > 0 ? protests[0].total_count : 0;
 
-      // Load stats
-      const { data: statsData } = await supabase.rpc('get_protest_stats', {
-        start_date: startDate || null,
-        end_date: endDate || null
-      });
+      // Load stats only if metrics are enabled via URL param
+      if (showMetrics) {
+        const { data: statsData } = await supabase.rpc('get_protest_stats', {
+          start_date: startDate || null,
+          end_date: endDate || null
+        });
 
-      stats = statsData;
+        stats = statsData;
+      }
     } catch (error) {
       console.error('Error loading protests:', error);
     } finally {
