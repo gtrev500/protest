@@ -698,8 +698,8 @@
       >
         <option value="event_desc">Event Date (Newest First)</option>
         <option value="event_asc">Event Date (Oldest First)</option>
-        <option value="submitted_desc">Submitted Date (Newest First)</option>
-        <option value="submitted_asc">Submitted Date (Oldest First)</option>
+        <option value="submitted_desc">Submission Date (Newest First)</option>
+        <option value="submitted_asc">Submission Date (Oldest First)</option>
       </select>
     </div>
 
