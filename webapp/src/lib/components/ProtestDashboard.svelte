@@ -19,7 +19,7 @@
   let page = $state(1);
   let pageSize = 20;
   let totalCount = $state(0);
-  let sortField = $state('date_of_event');
+  let sortField = $state('created_at');
   let sortOrder = $state('desc');
   let searchDebounceTimer: number | undefined;
   let showSearchHelp = $state(false);
